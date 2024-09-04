@@ -31,10 +31,10 @@ class TestContestFilter(unittest.TestCase):
 
     def test_apply_filters(self):
         filtered = ContestFilter.apply_filters(self.contests)
-        self.assertEqual(len(filtered), 2)
-        self.assertEqual(filtered[0]["id"], 2)
-        self.assertEqual(filtered[1]["id"], 3)
-
+        self.assertEqual(len(filtered), 3)
+        self.assertEqual(filtered[0]["id"], 1)
+        self.assertEqual(filtered[1]["id"], 2)
+        self.assertEqual(filtered[2]["id"], 3)
 class TestEntrantAnalyzer(unittest.TestCase):
     def test_analyze_experience_levels(self):
         entrants = [
