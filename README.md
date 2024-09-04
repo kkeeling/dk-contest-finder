@@ -25,6 +25,10 @@ This project is an autonomous system designed to identify and notify users of po
 
 (To be added as the project develops)
 
+## Features
+
+- Contest Filtering: The system can filter contests based on the number of entrants and contest title keywords.
+
 ## Project Structure
 
 ```
