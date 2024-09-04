@@ -32,6 +32,8 @@ class DataFetcher:
         
         if time_since_last_request < delay:
             time.sleep(delay - time_since_last_request)
+        else:
+            time.sleep(0.01)  # Ensure a small delay even if enough time has passed
         
         self.last_request_time = time.time()
 
