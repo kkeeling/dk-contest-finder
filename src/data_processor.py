@@ -14,7 +14,19 @@ class ContestFilter:
         filtered_by_entrants = cls.filter_by_entrants(contests, max_entrants)
         return cls.filter_by_title(filtered_by_entrants, title_keyword)
 
+class EntrantAnalyzer:
+    @staticmethod
+    def analyze_experience_levels(entrants: List[Dict[str, Any]]) -> float:
+        if not entrants:
+            return 0.0
+        highest_experience_count = sum(1 for entrant in entrants if entrant.get('experience_level', 0) == 3)
+        return highest_experience_count / len(entrants)
+
 class DataProcessor:
     @staticmethod
     def process_contests(contests: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        return ContestFilter.apply_filters(contests)
+        filtered_contests = ContestFilter.apply_filters(contests)
+        for contest in filtered_contests:
+            entrants = contest.get('participants', [])
+            contest['high_experience_ratio'] = EntrantAnalyzer.analyze_experience_levels(entrants)
+        return [contest for contest in filtered_contests if contest['high_experience_ratio'] < 0.3]
