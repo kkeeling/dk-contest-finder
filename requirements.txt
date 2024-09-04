@@ -1,0 +1,6 @@
+requests
+agentql
+pandas
+supabase-py
+slack-sdk
+schedule
