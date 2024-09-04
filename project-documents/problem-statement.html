@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DraftKings Contest Finder Agent - Problem Statement</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; }
+        .highlight { background-color: #f1c40f; padding: 2px 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>DraftKings Contest Finder Agent - Problem Statement</h1>
+
+    <h2>Overview</h2>
+    <p>
+        The DraftKings Contest Finder Agent is an autonomous system designed to identify and notify users of potentially advantageous contest opportunities on the DraftKings platform. By analyzing contest details and participant experience levels, the agent aims to find contests where users may have a competitive edge.
+    </p>
+
+    <h2>Key Challenges</h2>
+    <ol>
+        <li><strong>Data Acquisition:</strong> Regularly fetch and parse contest data from DraftKings' API and web pages.</li>
+        <li><strong>Contest Filtering:</strong> Identify contests meeting specific criteria (e.g., fewer than 10 entrants, "Double Up" contests).</li>
+        <li><strong>Participant Analysis:</strong> Evaluate the experience level of contest entrants.</li>
+        <li><strong>Real-time Processing:</strong> Continuously update and analyze contest data to provide timely notifications.</li>
+        <li><strong>Notification System:</strong> Deliver contest recommendations to users via Slack in a clear and actionable format.</li>
+        <li><strong>Data Management:</strong> Store and manage contest and participant data efficiently.</li>
+        <li><strong>Authentication:</strong> Securely authenticate with DraftKings to access necessary data.</li>
+        <li><strong>Scalability:</strong> Handle multiple sports and a large number of contests simultaneously.</li>
+    </ol>
+
+    <h2>Project Goals</h2>
+    <ol>
+        <li>Develop a robust web scraping system to collect contest data from DraftKings.</li>
+        <li>Implement an efficient algorithm to analyze contest entrants and their experience levels.</li>
+        <li>Create a reliable database system to store and manage contest information.</li>
+        <li>Build a notification system that sends timely alerts to users via Slack.</li>
+        <li>Ensure the agent operates autonomously, updating data and sending notifications every 5 minutes.</li>
+        <li>Develop a system that is scalable across multiple sports on the DraftKings platform.</li>
+    </ol>
+
+    <h2>Success Criteria</h2>
+    <p>
+        The project will be considered successful if it can:
+    </p>
+    <ul>
+        <li>Accurately identify contests meeting the specified criteria (fewer than 10 entrants or "Double Up" contests).</li>
+        <li>Correctly analyze the experience level of contest participants.</li>
+        <li>Reliably notify users of contests where less than 30% of entrants are at the highest experience level.</li>
+        <li>Operate continuously, updating data and sending notifications every 5 minutes.</li>
+        <li>Scale to handle multiple sports available on DraftKings.</li>
+        <li>Maintain data integrity and respect DraftKings' terms of service and API usage limits.</li>
+    </ul>
+
+    <h2>Constraints and Considerations</h2>
+    <ul>
+        <li>The agent must be developed using Python 3.11+ and utilize Conda for virtual environment management.</li>
+        <li>AgentQL will be used for web scraping tasks.</li>
+        <li>Supabase will serve as the database solution.</li>
+        <li>The project timeline is set for 3 weeks, with coding to begin within 3 days of project initiation.</li>
+        <li>The system must be designed to avoid overloading DraftKings' servers or violating their terms of service.</li>
+        <li>User privacy and data security must be maintained throughout the operation of the agent.</li>
+    </ul>
+
+    <p class="highlight">
+        This problem statement serves as the foundation for the DraftKings Contest Finder Agent project. It outlines the key challenges, goals, and success criteria that will guide the development process. As the project progresses, this document may be updated to reflect any changes in scope or requirements.
+    </p>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DraftKings Contest Finder Agent - Design & Technical Solution</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1, h2 { color: #2c3e50; }
+        h3 { color: #34495e; }
+        .component { background-color: #ecf0f1; padding: 15px; margin-bottom: 20px; border-left: 5px solid #3498db; }
+        .technology { background-color: #e8f6f3; padding: 10px; margin-bottom: 10px; border-left: 5px solid #1abc9c; }
+        code { background-color: #f9f2f4; padding: 2px 4px; border-radius: 4px; color: #c7254e; }
+    </style>
+</head>
+<body>
+    <h1>DraftKings Contest Finder Agent - Design & Technical Solution</h1>
+
+    <p>
+        This document outlines the technical design and solution for the DraftKings Contest Finder Agent, based on the problem statement and core requirements. The solution is structured into several key components, each addressing specific aspects of the system's functionality.
+    </p>
+
+    <h2>1. System Architecture</h2>
+    <p>
+        The DraftKings Contest Finder Agent will follow a modular architecture, consisting of the following main components:
+    </p>
+
+    <div class="component">
+        <h3>1.1 Data Fetcher</h3>
+        <p>Responsible for retrieving contest data from DraftKings API and web pages.</p>
+        <div class="technology">
+            <strong>Technologies:</strong> Python 3.11+, AgentQL, requests
+        </div>
+    </div>
+
+    <div class="component">
+        <h3>1.2 Data Processor</h3>
+        <p>Handles filtering, analysis, and preparation of contest and entrant data.</p>
+        <div class="technology">
+            <strong>Technologies:</strong> Python 3.11+, pandas
+        </div>
+    </div>
+
+    <div class="component">
+        <h3>1.3 Database Manager</h3>
+        <p>Manages data storage and retrieval operations with the Supabase database.</p>
+        <div class="technology">
+            <strong>Technologies:</strong> Python 3.11+, supabase-py
+        </div>
+    </div>
+
+    <div class="component">
+        <h3>1.4 Notifier</h3>
+        <p>Handles the creation and sending of notifications to Slack.</p>
+        <div class="technology">
+            <strong>Technologies:</strong> Python 3.11+, slack-sdk
+        </div>
+    </div>
+
+    <div class="component">
+        <h3>1.5 Scheduler</h3>
+        <p>Manages the periodic execution of the agent's tasks.</p>
+        <div class="technology">
+            <strong>Technologies:</strong> Python 3.11+, schedule
+        </div>
+    </div>
+
+    <h2>2. Detailed Component Design</h2>
+
+    <h3>2.1 Data Fetcher</h3>
+    <ul>
+        <li>Use requests library for HTTP requests to retrieve data</li>
+        <li>Use AgentQL for parsing HTML content from contest detail pages</li>
+        <li>Handle authentication with DraftKings (implement OAuth if required)</li>
+        <li>Implement rate limiting to avoid overloading DraftKings servers</li>
+    </ul>
+    <pre><code>
+import requests
+from agentql import AgentQL
+
+def fetch_contests(sport):
+    url = f"https://www.draftkings.com/lobby/getcontests?sport={sport}"
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
+
+def fetch_contest_details(contest_id):
+    url = f"https://www.draftkings.com/contest/detailspop?contestId={contest_id}"
+    response = requests.get(url)
+    response.raise_for_status()
+    html_content = response.text
+    return AgentQL.parse(html_content)
+    </code></pre>
+
+    <h3>2.2 Data Processor</h3>
+    <ul>
+        <li>Use pandas for efficient data manipulation and analysis</li>
+        <li>Implement contest filtering based on entry count and title</li>
+        <li>Create functions to analyze entrant experience levels</li>
+        <li>Develop algorithm to calculate percentage of high-experience entrants</li>
+    </ul>
+    <pre><code>
+def filter_contests(contests_df):
+    return contests_df[
+        (contests_df['entries'] < 10) | 
+        (contests_df['title'].str.contains('Double Up', case=False))
+    ]
+
+def analyze_entrants(entrants_df):
+    experience_map = {'Beginner': 0, 'Low': 1, 'Medium': 2, 'Highest': 3}
+    entrants_df['experience_level'] = entrants_df['experience'].map(experience_map)
+    high_experience_ratio = (entrants_df['experience_level'] == 3).mean()
+    return high_experience_ratio < 0.3
+    </code></pre>
+
+    <h3>2.3 Database Manager</h3>
+    <ul>
+        <li>Set up Supabase client for database operations</li>
+        <li>Create functions for inserting, updating, and querying contest data</li>
+        <li>Implement data synchronization between local and remote datasets</li>
+    </ul>
+    <pre><code>
+from supabase import create_client, Client
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def insert_contest(contest_data):
+    return supabase.table('dk_contests').insert(contest_data).execute()
+
+def update_contest_status(contest_id, status):
+    return supabase.table('dk_contests').update({"status": status}).eq("id", contest_id).execute()
+
+def get_unprocessed_contests():
+    return supabase.table('dk_contests').select("*").eq("status", "unprocessed").execute()
+    </code></pre>
+
+    <h3>2.4 Notifier</h3>
+    <ul>
+        <li>Set up Slack client for sending messages</li>
+        <li>Create message templates for contest notifications</li>
+        <li>Implement function to send formatted messages to Slack channel</li>
+    </ul>
+    <pre><code>
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+
+slack_client = WebClient(token=SLACK_BOT_TOKEN)
+
+def send_slack_notification(contest):
+    message = f"New contest found: {contest['title']}\n"
+    message += f"Entry Fee: ${contest['entry_fee']}\n"
+    message += f"Current Entries: {contest['current_entries']}/{contest['max_entries']}\n"
+    message += f"Link: https://www.draftkings.com/draft/contest/{contest['id']}"
+    
+    try:
+        response = slack_client.chat_postMessage(channel=SLACK_CHANNEL, text=message)
+        return response["ts"]
+    except SlackApiError as e:
+        print(f"Error sending message: {e}")
+    </code></pre>
+
+    <h3>2.5 Scheduler</h3>
+    <ul>
+        <li>Use the schedule library to set up periodic task execution</li>
+        <li>Implement main loop to run all components in sequence</li>
+        <li>Add error handling and logging for scheduled tasks</li>
+    </ul>
+    <pre><code>
+import schedule
+import time
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+def run_contest_finder():
+    try:
+        # Run all components in sequence
+        contests = data_fetcher.fetch_all_contests()
+        filtered_contests = data_processor.process_contests(contests)
+        database_manager.update_contests(filtered_contests)
+        eligible_contests = data_processor.find_eligible_contests(filtered_contests)
+        for contest in eligible_contests:
+            notifier.send_notification(contest)
+    except Exception as e:
+        logging.error(f"Error in contest finder: {e}")
+
+schedule.every(5).minutes.do(run_contest_finder)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+    </code></pre>
+
+    <h2>3. Data Flow</h2>
+    <ol>
+        <li>Scheduler triggers the main process every 5 minutes</li>
+        <li>Data Fetcher retrieves contest data from DraftKings</li>
+        <li>Data Processor filters and analyzes the contest data</li>
+        <li>Database Manager stores new contests and updates existing ones</li>
+        <li>Data Processor identifies eligible contests</li>
+        <li>Notifier sends alerts for eligible contests to Slack</li>
+    </ol>
+
+    <h2>4. Security Considerations</h2>
+    <ul>
+        <li>Store all sensitive information (API keys, tokens) in environment variables</li>
+        <li>Implement proper error handling to avoid exposing sensitive information in logs</li>
+        <li>Use HTTPS for all API communications</li>
+        <li>Regularly update dependencies to patch any security vulnerabilities</li>
+    </ul>
+
+    <h2>5. Scalability and Performance</h2>
+    <ul>
+        <li>Use efficient data structures and algorithms to handle large volumes of contest data</li>
+        <li>Implement caching mechanisms to reduce redundant API calls</li>
+        <li>Use database indexing to optimize query performance</li>
+        <li>Design the system to be horizontally scalable for future growth</li>
+    </ul>
+
+    <p>
+        This technical design provides a comprehensive blueprint for implementing the DraftKings Contest Finder Agent. It addresses all core requirements while considering performance, scalability, and security aspects of the system.
+    </p>
+</body>
+</html>

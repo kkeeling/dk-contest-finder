@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DraftKings Contest Finder Agent - Core Requirements</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; }
+        .requirement { background-color: #ecf0f1; padding: 10px; margin-bottom: 10px; border-left: 5px solid #3498db; }
+        .requirement h3 { margin-top: 0; color: #2980b9; }
+    </style>
+</head>
+<body>
+    <h1>DraftKings Contest Finder Agent - Core Requirements</h1>
+
+    <p>
+        Based on the problem statement, the following core requirements have been identified for the DraftKings Contest Finder Agent. These requirements focus on the key functionalities needed for an MVP (Minimum Viable Product) and are crucial for the project's success.
+    </p>
+
+    <h2>1. Data Acquisition and Processing</h2>
+
+    <div class="requirement">
+        <h3>REQ-1.1: Contest Data Retrieval</h3>
+        <p>The system must periodically fetch contest data from the DraftKings API for all available sports.</p>
+        <ul>
+            <li>Use the endpoint: https://www.draftkings.com/lobby/getcontests?sport={sport}</li>
+            <li>Handle all valid sport abbreviations (e.g., NFL, NHL, TEN)</li>
+            <li>Fetch data every 5 minutes</li>
+        </ul>
+    </div>
+
+    <div class="requirement">
+        <h3>REQ-1.2: Contest Filtering</h3>
+        <p>The system must filter contests based on specific criteria:</p>
+        <ul>
+            <li>Contests with fewer than 10 entrants</li>
+            <li>Contests with "Double Up" in the title</li>
+        </ul>
+    </div>
+
+    <div class="requirement">
+        <h3>REQ-1.3: Entrant Data Retrieval</h3>
+        <p>For each filtered contest, the system must fetch detailed entrant data.</p>
+        <ul>
+            <li>Use the endpoint: https://www.draftkings.com/contest/detailspop?contestId={contestId}</li>
+            <li>Handle authentication with DraftKings</li>
+            <li>Process newly found contests and those not yet marked as ready_to_enter</li>
+        </ul>
+    </div>
+
+    <h2>2. Data Analysis</h2>
+
+    <div class="requirement">
+        <h3>REQ-2.1: Entrant Experience Analysis</h3>
+        <p>The system must analyze the experience level of each entrant in a contest.</p>
+        <ul>
+            <li>Assign values: 0 (beginner), 1 (low), 2 (medium), 3 (highest)</li>
+            <li>Calculate the percentage of entrants at the highest experience level</li>
+        </ul>
+    </div>
+
+    <div class="requirement">
+        <h3>REQ-2.2: Contest Eligibility Determination</h3>
+        <p>The system must determine if a contest is eligible for notification.</p>
+        <ul>
+            <li>Mark contests as "ready_to_enter" if less than 30% of entrants are at the highest experience level</li>
+            <li>Exclude non-Double Up contests containing blacklisted usernames</li>
+        </ul>
+    </div>
+
+    <h2>3. Data Storage</h2>
+
+    <div class="requirement">
+        <h3>REQ-3.1: Contest Data Storage</h3>
+        <p>The system must store relevant contest data in a Supabase database.</p>
+        <ul>
+            <li>Create a `dk_contests` table to store contest information</li>
+            <li>Include fields for contest ID, title, entry fee, total prizes, current entries, and status</li>
+        </ul>
+    </div>
+
+    <h2>4. Notification System</h2>
+
+    <div class="requirement">
+        <h3>REQ-4.1: Slack Integration</h3>
+        <p>The system must integrate with Slack to send notifications.</p>
+        <ul>
+            <li>Set up a Slack bot or app with necessary permissions</li>
+            <li>Configure the system to post messages to a specified Slack channel</li>
+        </ul>
+    </div>
+
+    <div class="requirement">
+        <h3>REQ-4.2: Notification Content</h3>
+        <p>The system must send notifications for eligible contests.</p>
+        <ul>
+            <li>Include a link to the contest: https://www.draftkings.com/draft/contest/{contestId}</li>
+            <li>Provide relevant contest details (e.g., entry fee, prizes, current entries)</li>
+        </ul>
+    </div>
+
+    <h2>5. System Operations</h2>
+
+    <div class="requirement">
+        <h3>REQ-5.1: Automated Execution</h3>
+        <p>The system must operate autonomously on a set schedule.</p>
+        <ul>
+            <li>Run the entire process every 5 minutes</li>
+            <li>Use the `schedule` Python library for task scheduling</li>
+        </ul>
+    </div>
+
+    <div class="requirement">
+        <h3>REQ-5.2: Error Handling and Logging</h3>
+        <p>The system must implement robust error handling and logging.</p>
+        <ul>
+            <li>Log all significant events and errors</li>
+            <li>Implement appropriate error recovery mechanisms</li>
+        </ul>
+    </div>
+
+    <h2>6. Development Environment</h2>
+
+    <div class="requirement">
+        <h3>REQ-6.1: Technology Stack</h3>
+        <p>The system must be developed using the specified technology stack.</p>
+        <ul>
+            <li>Use Python 3.11+ as the primary programming language</li>
+            <li>Use Conda for virtual environment management</li>
+            <li>Use AgentQL for web scraping tasks</li>
+            <li>Use Supabase as the database solution</li>
+        </ul>
+    </div>
+
+    <p>
+        These core requirements provide a foundation for the development of the DraftKings Contest Finder Agent. They focus on the essential functionalities needed for the MVP while keeping in mind the project constraints and goals outlined in the problem statement.
+    </p>
+</body>
+</html>
