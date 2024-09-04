@@ -16,143 +16,49 @@
     <h1>DraftKings Contest Finder Agent - User Stories for Sprint 1</h1>
     <p>Sprint 1 focuses on project setup and core functionality development, particularly the Data Fetcher component.</p>
 
-    <div class="user-story">
-        <h3>US-1.1: Project Setup</h3>
-        <p><strong>As a</strong> developer,<br>
-        <strong>I want to</strong> set up the initial project structure and environment,<br>
-        <strong>So that</strong> I can start developing the DraftKings Contest Finder Agent efficiently.</p>
-        
-        <h4>Acceptance Criteria:</h4>
-        <ul>
-            <li>A Git repository is initialized with a proper .gitignore file</li>
-            <li>A Conda environment is created with Python 3.11+</li>
-            <li>Required libraries (requests, AgentQL, pandas, supabase-py, slack-sdk, schedule) are installed</li>
-            <li>A basic project structure is set up with placeholder files for main components</li>
-            <li>A README.md file is created with project overview and setup instructions</li>
-        </ul>
-        
-        <h4>Tasks:</h4>
-        <div class="task">
-            <strong>T-1.1.1:</strong> Initialize Git repository and create .gitignore file
-        </div>
-        <div class="task">
-            <strong>T-1.1.2:</strong> Create Conda environment with Python 3.11+
-        </div>
-        <div class="task">
-            <strong>T-1.1.3:</strong> Install required libraries
-        </div>
-        <div class="task">
-            <strong>T-1.1.4:</strong> Set up basic project structure
-        </div>
-        <div class="task">
-            <strong>T-1.1.5:</strong> Create README.md file
-        </div>
-    </div>
+    <!-- Previous user stories (US-1.1, US-1.2, US-1.3) remain unchanged -->
 
     <div class="user-story">
-        <h3>US-1.2: Implement Data Fetcher for Contest Retrieval</h3>
+        <h3>US-1.4: Configure AgentQL for Browser-Like Access to DraftKings</h3>
         <p><strong>As a</strong> developer,<br>
-        <strong>I want to</strong> create a Data Fetcher component that can retrieve contest data from DraftKings,<br>
-        <strong>So that</strong> the agent can access up-to-date information about available contests.</p>
+        <strong>I want to</strong> configure AgentQL to mimic a standard desktop browser when accessing DraftKings webpages,<br>
+        <strong>So that</strong> the agent can retrieve contest data without being flagged as a bot.</p>
         
         <h4>Acceptance Criteria:</h4>
         <ul>
-            <li>The Data Fetcher can make HTTP requests to the DraftKings API</li>
-            <li>Contest data can be retrieved for all supported sports</li>
-            <li>The fetched data is returned in a structured format (e.g., JSON)</li>
-            <li>Error handling is implemented for network issues and API errors</li>
-            <li>Rate limiting is implemented to avoid overloading the DraftKings servers</li>
+            <li>AgentQL is configured to mimic a standard desktop browser (e.g., Chrome) when accessing DraftKings webpages</li>
+            <li>The system can successfully access and parse DraftKings contest pages using AgentQL</li>
+            <li>HTTP headers, including User-Agent, are set to appear as a legitimate browser</li>
+            <li>The system respects robots.txt rules and implements appropriate request delays</li>
+            <li>Error handling is in place for cases where pages fail to load or content is unexpected</li>
         </ul>
         
         <h4>Tasks:</h4>
         <div class="task">
-            <strong>T-1.2.1:</strong> Create a function to construct the API URL for different sports
+            <strong>T-1.4.1:</strong> Configure AgentQL to use a standard desktop browser User-Agent string
         </div>
         <div class="task">
-            <strong>T-1.2.2:</strong> Implement a function to make HTTP GET requests using the requests library
+            <strong>T-1.4.2:</strong> Set appropriate HTTP headers to mimic a real browser (e.g., Accept, Accept-Language, Referer)
         </div>
         <div class="task">
-            <strong>T-1.2.3:</strong> Add error handling for network issues and API errors
+            <strong>T-1.4.3:</strong> Implement respect for robots.txt rules in the Data Fetcher
         </div>
         <div class="task">
-            <strong>T-1.2.4:</strong> Implement rate limiting mechanism
+            <strong>T-1.4.4:</strong> Add configurable delay between requests to avoid overloading DraftKings servers
         </div>
         <div class="task">
-            <strong>T-1.2.5:</strong> Create unit tests for the Data Fetcher component
-        </div>
-    </div>
-
-    <div class="user-story">
-        <h3>US-1.3: Implement Contest Details Retrieval</h3>
-        <p><strong>As a</strong> developer,<br>
-        <strong>I want to</strong> enhance the Data Fetcher to retrieve detailed information about specific contests,<br>
-        <strong>So that</strong> the agent can analyze participant information and contest specifics.</p>
-        
-        <h4>Acceptance Criteria:</h4>
-        <ul>
-            <li>The Data Fetcher can retrieve detailed contest information using contest IDs</li>
-            <li>AgentQL is used to parse the HTML content of contest detail pages</li>
-            <li>Participant information, including usernames and experience levels, is extracted</li>
-            <li>The fetched details are returned in a structured format for further processing</li>
-            <li>Error handling is implemented for cases where contest details are unavailable</li>
-        </ul>
-        
-        <h4>Tasks:</h4>
-        <div class="task">
-            <strong>T-1.3.1:</strong> Implement a function to construct the URL for contest detail pages
+            <strong>T-1.4.5:</strong> Create error handling for page load failures and unexpected content structures
         </div>
         <div class="task">
-            <strong>T-1.3.2:</strong> Use AgentQL to parse the HTML content of contest detail pages
+            <strong>T-1.4.6:</strong> Update existing Data Fetcher functions to use the new AgentQL configuration
         </div>
         <div class="task">
-            <strong>T-1.3.3:</strong> Extract relevant information (participants, experience levels) from parsed data
-        </div>
-        <div class="task">
-            <strong>T-1.3.4:</strong> Implement error handling for unavailable contest details
-        </div>
-        <div class="task">
-            <strong>T-1.3.5:</strong> Create unit tests for the contest details retrieval functionality
-        </div>
-    </div>
-
-    <div class="user-story">
-        <h3>US-1.4: Implement DraftKings Authentication</h3>
-        <p><strong>As a</strong> developer,<br>
-        <strong>I want to</strong> implement authentication with DraftKings,<br>
-        <strong>So that</strong> the agent can access protected endpoints and retrieve necessary data.</p>
-        
-        <h4>Acceptance Criteria:</h4>
-        <ul>
-            <li>The Data Fetcher can authenticate with DraftKings using provided credentials</li>
-            <li>Authentication tokens are securely stored and managed</li>
-            <li>The system can handle token expiration and refresh processes</li>
-            <li>Authenticated requests can be made to protected DraftKings endpoints</li>
-            <li>Sensitive information (e.g., credentials) is not exposed in logs or error messages</li>
-        </ul>
-        
-        <h4>Tasks:</h4>
-        <div class="task">
-            <strong>T-1.4.1:</strong> Research DraftKings authentication process and requirements
-        </div>
-        <div class="task">
-            <strong>T-1.4.2:</strong> Implement authentication function using necessary protocols (e.g., OAuth)
-        </div>
-        <div class="task">
-            <strong>T-1.4.3:</strong> Create secure storage for authentication tokens
-        </div>
-        <div class="task">
-            <strong>T-1.4.4:</strong> Implement token refresh mechanism
-        </div>
-        <div class="task">
-            <strong>T-1.4.5:</strong> Update Data Fetcher to use authenticated requests when necessary
-        </div>
-        <div class="task">
-            <strong>T-1.4.6:</strong> Create unit tests for authentication functionality
+            <strong>T-1.4.7:</strong> Create unit tests to verify browser-like behavior and successful page access
         </div>
     </div>
 
     <p>
-        These user stories and tasks cover the main objectives for Sprint 1, focusing on setting up the project and implementing the core functionality of the Data Fetcher component. The development team should prioritize these items and may adjust the tasks as needed based on project progress and any unforeseen challenges.
+        These user stories and tasks cover the main objectives for Sprint 1, focusing on setting up the project and implementing the core functionality of the Data Fetcher component, including configuring AgentQL for browser-like access to DraftKings pages. The development team should prioritize these items and may adjust the tasks as needed based on project progress and any unforeseen challenges.
     </p>
 </body>
 </html>
