@@ -13,11 +13,11 @@ class ContestFilter:
     def apply_filters(cls, contests: List[Dict[str, Any]], max_entrants: int = 10, title_keyword: str = "Double Up") -> List[Dict[str, Any]]:
         filtered_contests = cls.filter_by_entrants(contests, max_entrants)
         filtered_contests = cls.filter_by_title(filtered_contests, title_keyword)
-        return filtered_contests
+        return [contest for contest in filtered_contests if contest['entries']['current'] < max_entrants and title_keyword.lower() in contest['title'].lower()]
 
 class DataProcessor:
     def __init__(self):
         self.contest_filter = ContestFilter()
 
     def process_contests(self, contests: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        return self.contest_filter.apply_filters(contests)
+        return ContestFilter.apply_filters(contests)
