@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from src.data_fetcher import DataFetcher
 
 class TestDataFetcher(unittest.TestCase):
@@ -39,6 +39,50 @@ class TestDataFetcher(unittest.TestCase):
         for sport in DataFetcher.SUPPORTED_SPORTS:
             self.assertIn(sport, result)
             self.assertEqual(result[sport], [{"id": 1, "name": "Test Contest"}])
+
+    @patch('src.data_fetcher.sync_playwright')
+    def test_fetch_contest_details(self, mock_sync_playwright):
+        mock_page = MagicMock()
+        mock_page.query_data.return_value = {
+            'contest_info': {
+                'title': 'Test Contest',
+                'entry_fee': 10,
+                'total_prizes': 100,
+                'entries': {'current': 5, 'maximum': 10}
+            },
+            'participants': [
+                {'username': 'user1', 'experience_level': 'Beginner'},
+                {'username': 'user2', 'experience_level': 'High'}
+            ]
+        }
+        mock_browser = MagicMock()
+        mock_browser.new_page.return_value = mock_page
+        mock_playwright = MagicMock()
+        mock_playwright.chromium.launch.return_value = mock_browser
+        mock_sync_playwright.return_value.__enter__.return_value = mock_playwright
+
+        result = self.data_fetcher.fetch_contest_details("123")
+
+        expected_result = {
+            'contest_info': {
+                'title': 'Test Contest',
+                'entry_fee': 10,
+                'total_prizes': 100,
+                'entries': {'current': 5, 'maximum': 10}
+            },
+            'participants': [
+                {'username': 'user1', 'experience_level': 0},
+                {'username': 'user2', 'experience_level': 3}
+            ]
+        }
+        self.assertEqual(result, expected_result)
+
+    def test_map_experience_level(self):
+        self.assertEqual(self.data_fetcher._map_experience_level('Beginner'), 0)
+        self.assertEqual(self.data_fetcher._map_experience_level('Low'), 1)
+        self.assertEqual(self.data_fetcher._map_experience_level('Medium'), 2)
+        self.assertEqual(self.data_fetcher._map_experience_level('High'), 3)
+        self.assertEqual(self.data_fetcher._map_experience_level('Unknown'), 0)
 
 if __name__ == '__main__':
     unittest.main()
