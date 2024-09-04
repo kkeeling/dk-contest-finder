@@ -11,18 +11,29 @@ class TestDataFetcher(unittest.TestCase):
         url = self.data_fetcher._construct_url("NFL")
         self.assertEqual(url, "https://www.draftkings.com/lobby/getcontests?sport=NFL")
 
-    @patch('src.data_fetcher.requests.get')
-    def test_make_request(self, mock_get):
-        mock_get.return_value.json.return_value = {"Contests": []}
-        mock_get.return_value.raise_for_status.return_value = None
-        
-        result = self.data_fetcher._make_request("https://test.com")
-        self.assertEqual(result, {"Contests": []})
+    def test_respect_robots_txt(self):
+        with patch.object(self.data_fetcher.rp, 'can_fetch', return_value=True):
+            self.assertTrue(self.data_fetcher._respect_robots_txt("https://www.draftkings.com/test"))
+        with patch.object(self.data_fetcher.rp, 'can_fetch', return_value=False):
+            self.assertFalse(self.data_fetcher._respect_robots_txt("https://www.draftkings.com/test"))
 
-    @patch('src.data_fetcher.DataFetcher._make_request')
-    def test_fetch_contests(self, mock_make_request):
-        mock_make_request.return_value = {"Contests": [{"id": 1, "name": "Test Contest"}]}
-        
+    @patch('time.sleep')
+    def test_wait_between_requests(self, mock_sleep):
+        self.data_fetcher._wait_between_requests()
+        mock_sleep.assert_called()
+
+    @patch('src.data_fetcher.sync_playwright')
+    @patch('src.data_fetcher.DataFetcher._respect_robots_txt', return_value=True)
+    @patch('src.data_fetcher.DataFetcher._wait_between_requests')
+    def test_fetch_contests(self, mock_wait, mock_respect_robots, mock_sync_playwright):
+        mock_page = MagicMock()
+        mock_page.query_data.return_value = {"Contests": [{"id": 1, "name": "Test Contest"}]}
+        mock_browser = MagicMock()
+        mock_browser.new_page.return_value = mock_page
+        mock_playwright = MagicMock()
+        mock_playwright.chromium.launch.return_value = mock_browser
+        mock_sync_playwright.return_value.__enter__.return_value = mock_playwright
+
         result = self.data_fetcher.fetch_contests("NFL")
         self.assertEqual(result, [{"id": 1, "name": "Test Contest"}])
 
@@ -41,7 +52,9 @@ class TestDataFetcher(unittest.TestCase):
             self.assertEqual(result[sport], [{"id": 1, "name": "Test Contest"}])
 
     @patch('src.data_fetcher.sync_playwright')
-    def test_fetch_contest_details(self, mock_sync_playwright):
+    @patch('src.data_fetcher.DataFetcher._respect_robots_txt', return_value=True)
+    @patch('src.data_fetcher.DataFetcher._wait_between_requests')
+    def test_fetch_contest_details(self, mock_wait, mock_respect_robots, mock_sync_playwright):
         mock_page = MagicMock()
         mock_page.query_data.return_value = {
             'contest_info': {
