@@ -11,7 +11,8 @@ class ContestFilter:
 
     @classmethod
     def apply_filters(cls, contests: List[Dict[str, Any]], max_entrants: int = 10, title_keyword: str = "Double Up") -> List[Dict[str, Any]]:
-        return [contest for contest in contests if contest['entries']['current'] < max_entrants and title_keyword.lower() in contest['title'].lower()]
+        filtered_by_entrants = cls.filter_by_entrants(contests, max_entrants)
+        return cls.filter_by_title(filtered_by_entrants, title_keyword)
 
 class DataProcessor:
     @staticmethod
