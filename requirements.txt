@@ -1,8 +1,9 @@
-agentql
-pandas
-supabase
-slack-sdk>=3.0
-schedule
-playwright
-python-dotenv
-unittest
+agentql==0.1.0
+pandas==1.5.3
+supabase==1.0.3
+slack-sdk==3.21.3
+schedule==1.2.0
+playwright==1.32.1
+python-dotenv==1.0.0
+requests==2.28.2
+typing-extensions==4.5.0
