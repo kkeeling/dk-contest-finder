@@ -91,37 +91,33 @@ class DataFetcher:
                 page.goto(url)
                 QUERY = """
                 {
-                    contest_info: {
-                        title
-                        entry_fee
-                        total_prizes
-                        entries: {
-                            current
-                            maximum
-                        }
-                    }
-                    participants: [
-                        {
-                            username
-                            experience_level
-                        }
-                    ]
+                    contest_info
+                    participants
                 }
                 """
                 contest_data = page.query_data(QUERY)
                 
+                processed_data = {
+                    'title': contest_data.get('contest_info', {}).get('title', ''),
+                    'entry_fee': contest_data.get('contest_info', {}).get('entry_fee', 0),
+                    'total_prizes': contest_data.get('contest_info', {}).get('total_prizes', 0),
+                    'entries': {
+                        'current': contest_data.get('contest_info', {}).get('entries', {}).get('current', 0),
+                        'maximum': contest_data.get('contest_info', {}).get('entries', {}).get('maximum', 0)
+                    },
+                    'participants': []
+                }
+
                 # Process participant data
                 participants = contest_data.get('participants', [])
-                processed_participants = []
                 for participant in participants:
                     experience_level = self._map_experience_level(participant.get('experience_level', ''))
-                    processed_participants.append({
+                    processed_data['participants'].append({
                         'username': participant.get('username', ''),
                         'experience_level': experience_level
                     })
 
-                contest_data['participants'] = processed_participants
-                return contest_data
+                return processed_data
             except Exception as e:
                 print(f"Error fetching contest details: {e}")
                 return {}
