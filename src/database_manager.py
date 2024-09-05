@@ -1,12 +1,18 @@
 # This file will contain the Database Manager component implementation
 import os
+from dotenv import load_dotenv
 from supabase import create_client, Client
 from typing import List, Dict, Any
 
+# Load environment variables from .env.local file
+load_dotenv('.env.local')
+
 class DatabaseManager:
     def __init__(self):
-        url: str = os.environ.get("SUPABASE_URL")
-        key: str = os.environ.get("SUPABASE_KEY")
+        url: str = os.getenv("SUPABASE_URL")
+        key: str = os.getenv("SUPABASE_KEY")
+        if not url or not key:
+            raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in .env.local file")
         self.supabase: Client = create_client(url, key)
 
     def insert_contests(self, contests: List[Dict[str, Any]]) -> None:
