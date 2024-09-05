@@ -71,14 +71,18 @@ class TestDatabaseManager(unittest.TestCase):
             self.assertIn('entries_maximum', processed_contest)
             self.assertIn('status', processed_contest)
 
-    @patch('src.database_manager.DatabaseManager.supabase')
-    def test_batch_insert_entrants(self, mock_supabase):
+    @patch('src.database_manager.DatabaseManager.get_supabase')
+    def test_batch_insert_entrants(self, mock_get_supabase):
+        mock_supabase = MagicMock()
+        mock_get_supabase.return_value = mock_supabase
         entrants = [{'username': 'user1'}, {'username': 'user2'}]
         self.db_manager.batch_insert_entrants('1', entrants, batch_size=1)
         self.assertEqual(mock_supabase.table().insert.call_count, 2)
 
-    @patch('src.database_manager.DatabaseManager.supabase')
-    def test_query_contests(self, mock_supabase):
+    @patch('src.database_manager.DatabaseManager.get_supabase')
+    def test_query_contests(self, mock_get_supabase):
+        mock_supabase = MagicMock()
+        mock_get_supabase.return_value = mock_supabase
         criteria = {'status': 'processed'}
         mock_supabase.table().select().eq().execute.return_value.data = [{'id': '1', 'status': 'processed'}]
         result = self.db_manager.query_contests(criteria)
