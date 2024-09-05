@@ -69,7 +69,20 @@ class DatabaseManager:
         try:
             for i in range(0, len(contests), batch_size):
                 batch = contests[i:i+batch_size]
-                self.supabase.table('contests').insert(batch).execute()
+                processed_batch = []
+                for contest in batch:
+                    processed_contest = {
+                        'id': contest.get('id'),
+                        'title': contest.get('title'),
+                        'entry_fee': contest.get('entry_fee', 0),  # Default to 0 if not provided
+                        'total_prizes': contest.get('total_prizes'),
+                        'entries_current': contest.get('entries', {}).get('current'),
+                        'entries_maximum': contest.get('entries', {}).get('maximum'),
+                        'status': contest.get('status', 'unprocessed'),
+                        'highest_experience_ratio': contest.get('highest_experience_ratio'),
+                    }
+                    processed_batch.append(processed_contest)
+                self.supabase.table('contests').insert(processed_batch).execute()
             logger.info(f"Successfully batch inserted {len(contests)} contests")
         except Exception as e:
             logger.error(f"Error batch inserting contests: {str(e)}")

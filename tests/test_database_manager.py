@@ -52,9 +52,24 @@ class TestDatabaseManager(unittest.TestCase):
     def test_batch_insert_contests(self, mock_get_supabase):
         mock_supabase = MagicMock()
         mock_get_supabase.return_value = mock_supabase
-        contests = [{'id': '1', 'title': 'Test Contest 1'}, {'id': '2', 'title': 'Test Contest 2'}]
+        contests = [
+            {'id': '1', 'title': 'Test Contest 1', 'entry_fee': 10, 'total_prizes': 100, 'entries': {'current': 5, 'maximum': 10}},
+            {'id': '2', 'title': 'Test Contest 2', 'entry_fee': 20, 'total_prizes': 200, 'entries': {'current': 8, 'maximum': 15}}
+        ]
         self.db_manager.batch_insert_contests(contests, batch_size=1)
         self.assertEqual(mock_supabase.table().insert.call_count, 2)
+        
+        # Check if the processed contests have all required fields
+        calls = mock_supabase.table().insert.call_args_list
+        for i, call in enumerate(calls):
+            processed_contest = call[0][0]
+            self.assertIn('id', processed_contest)
+            self.assertIn('title', processed_contest)
+            self.assertIn('entry_fee', processed_contest)
+            self.assertIn('total_prizes', processed_contest)
+            self.assertIn('entries_current', processed_contest)
+            self.assertIn('entries_maximum', processed_contest)
+            self.assertIn('status', processed_contest)
 
     @patch('src.database_manager.DatabaseManager.supabase')
     def test_batch_insert_entrants(self, mock_supabase):
