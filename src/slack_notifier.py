@@ -11,23 +11,20 @@ logger = logging.getLogger(__name__)
 load_dotenv('.env.local')
 
 class SlackNotifier:
-    def __init__(self, token=None, default_channel=None):
+    def __init__(self, token=None):
         self.token = token or os.getenv("SLACK_BOT_TOKEN") or "test_token"
         self.client = WebClient(token=self.token)
-        self.default_channel = default_channel or os.getenv("SLACK_DEFAULT_CHANNEL") or "test_channel"
+        self.channel = "__dk_contests"
 
-    def send_notification(self, message, channel=None, max_retries=3):
-        target_channel = channel or self.default_channel
-        if not target_channel:
-            raise ValueError("A target channel is required")
+    def send_notification(self, message, max_retries=3):
 
         for attempt in range(max_retries):
             try:
                 response = self.client.chat_postMessage(
-                    channel=target_channel,
+                    channel=self.channel,
                     text=message
                 )
-                logger.info(f"Message sent successfully to channel {target_channel}")
+                logger.info(f"Message sent successfully to channel {self.channel}")
                 return response
             except SlackApiError as e:
                 if e.response.status_code == 429:

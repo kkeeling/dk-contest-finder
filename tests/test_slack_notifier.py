@@ -16,7 +16,7 @@ class TestSlackNotifier(unittest.TestCase):
         result = self.notifier.send_notification("Test message")
 
         mock_client.chat_postMessage.assert_called_once_with(
-            channel="test_channel",
+            channel="__dk_contests",
             text="Test message"
         )
         self.assertTrue(result["ok"])
