@@ -81,11 +81,11 @@ class DatabaseManager:
                 for contest in batch:
                     processed_contest = {
                         'id': contest.get('id'),
-                        'title': contest.get('title'),
-                        'entry_fee': contest.get('entry_fee', 0),  # Default to 0 if not provided
-                        'total_prizes': contest.get('total_prizes'),
-                        'current_entries': contest.get('entries', {}).get('current'),
-                        'maximum_entries': contest.get('entries', {}).get('maximum'),
+                        'title': contest.get('n'),
+                        'entry_fee': contest.get('a', 0),  # Default to 0 if not provided
+                        'total_prizes': contest.get('po', 0),
+                        'current_entries': contest.get('nt', 0),
+                        'maximum_entries': contest.get('m', 0),
                         'status': contest.get('status', 'unprocessed'),
                         'highest_experience_ratio': contest.get('highest_experience_ratio'),
                     }
