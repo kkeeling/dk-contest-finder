@@ -2,7 +2,6 @@ import time
 import random
 from typing import List, Dict, Any
 import requests
-from urllib.robotparser import RobotFileParser
 from .utils import with_spinner
 
 print("DataFetcher module imported")
@@ -18,18 +17,10 @@ class DataFetcher:
         self.min_delay = min_delay
         self.max_delay = max_delay
         self.last_request_time = 0
-        self.rp = RobotFileParser()
-        self.rp.set_url(f"{self.BASE_URL}/robots.txt")
-        self.rp.read()
         print("DataFetcher initialized")
 
     def _construct_url(self, sport: str) -> str:
         return f"{self.LOBBY_URL}?sport={sport}"
-
-    def _respect_robots_txt(self, url: str) -> bool:
-        can_fetch = self.rp.can_fetch("*", url)
-        print(f"Checking robots.txt for URL: {url}. Can fetch: {can_fetch}")
-        return can_fetch
 
     def _wait_between_requests(self):
         current_time = time.time()
@@ -56,10 +47,6 @@ class DataFetcher:
         url = self._construct_url(sport)
         print(f"Constructed URL: {url}")
         
-        if not self._respect_robots_txt(url):
-            print(f"Access to {url} disallowed by robots.txt")
-            return []
-
         self._wait_between_requests()
 
         try:
@@ -91,10 +78,6 @@ class DataFetcher:
         url = self.CONTEST_DETAILS_URL.format(contest_id)
         print(f"Contest details URL: {url}")
         
-        if not self._respect_robots_txt(url):
-            print(f"Access to {url} disallowed by robots.txt")
-            return {}
-
         self._wait_between_requests()
 
         with sync_playwright() as p:
