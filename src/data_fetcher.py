@@ -1,8 +1,7 @@
 import time
 import random
 from typing import List, Dict, Any
-import agentql
-from playwright.sync_api import sync_playwright
+import requests
 from urllib.robotparser import RobotFileParser
 from .utils import with_spinner
 
@@ -52,19 +51,15 @@ class DataFetcher:
 
         self._wait_between_requests()
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = agentql.wrap(browser.new_page())
-            
-            try:
-                page.goto(url)
-                data = page.query_data(f"{{Contests[0:{limit}]}}")
-                return data.get("Contests", [])
-            except Exception as e:
-                print(f"Error fetching contests: {e}")
-                return []
-            finally:
-                browser.close()
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+            contests = data.get("Contests", [])
+            return contests[:limit]
+        except requests.RequestException as e:
+            print(f"Error fetching contests: {e}")
+            return []
 
     @with_spinner("Fetching all contests", spinner_type="dots")
     def fetch_all_contests(self, limit: int = 100) -> Dict[str, List[Dict[str, Any]]]:

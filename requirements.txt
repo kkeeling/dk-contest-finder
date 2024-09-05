@@ -1,9 +1,7 @@
-agentql
 pandas
 supabase
 slack-sdk
 schedule
-playwright
 python-dotenv
 requests
 typing-extensions
