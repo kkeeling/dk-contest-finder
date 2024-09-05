@@ -41,7 +41,7 @@ class TestSlackNotifier(unittest.TestCase):
 
         mock_client.chat_postMessage.assert_called_once()
         call_args = mock_client.chat_postMessage.call_args[1]
-        self.assertEqual(call_args['channel'], "test_channel")
+        self.assertEqual(call_args['channel'], "__dk_contests")
         self.assertIn("Test Contest", call_args['text'])
         self.assertIn("$10", call_args['text'])
         self.assertIn("$100", call_args['text'])

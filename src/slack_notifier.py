@@ -17,7 +17,6 @@ class SlackNotifier:
         self.channel = "__dk_contests"
 
     def send_notification(self, message, max_retries=3):
-
         for attempt in range(max_retries):
             try:
                 response = self.client.chat_postMessage(
