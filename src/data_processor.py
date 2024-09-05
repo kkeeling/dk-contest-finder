@@ -18,17 +18,52 @@ class ContestFilter:
 
 class EntrantAnalyzer:
     @staticmethod
-    def analyze_experience_levels(entrants: List[Dict[str, Any]]) -> float:
+    def categorize_experience_level(level: int) -> int:
+        if level == 0:
+            return 0  # beginner
+        elif level == 1:
+            return 1  # low
+        elif level == 2:
+            return 2  # medium
+        else:
+            return 3  # highest
+
+    @staticmethod
+    def analyze_experience_levels(entrants: List[Dict[str, Any]]) -> Dict[str, Any]:
         if not entrants:
-            return 0.0
-        highest_experience_count = sum(1 for entrant in entrants if entrant.get('experience_level', 0) == 3)
-        return highest_experience_count / len(entrants)
+            return {"highest_experience_ratio": 0.0, "experience_distribution": {}}
+
+        experience_counts = {0: 0, 1: 0, 2: 0, 3: 0}
+        total_entrants = len(entrants)
+
+        for entrant in entrants:
+            level = EntrantAnalyzer.categorize_experience_level(entrant.get('experience_level', 0))
+            experience_counts[level] += 1
+
+        highest_experience_ratio = experience_counts[3] / total_entrants
+
+        experience_distribution = {
+            level: count / total_entrants
+            for level, count in experience_counts.items()
+        }
+
+        return {
+            "highest_experience_ratio": highest_experience_ratio,
+            "experience_distribution": experience_distribution
+        }
 
 class DataProcessor:
     @staticmethod
     def process_contests(contests: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         filtered_contests = ContestFilter.apply_filters(contests)
+        processed_contests = []
+
         for contest in filtered_contests:
             entrants = contest.get('participants', [])
-            contest['high_experience_ratio'] = EntrantAnalyzer.analyze_experience_levels(entrants)
-        return [contest for contest in filtered_contests if contest['high_experience_ratio'] < 0.3]
+            analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
+            contest.update(analysis_result)
+
+            if analysis_result['highest_experience_ratio'] < 0.3:
+                processed_contests.append(contest)
+
+        return processed_contests

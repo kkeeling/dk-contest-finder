@@ -44,12 +44,14 @@ class TestEntrantAnalyzer(unittest.TestCase):
             {"experience_level": 3},
             {"experience_level": 3},
         ]
-        ratio = EntrantAnalyzer.analyze_experience_levels(entrants)
-        self.assertEqual(ratio, 0.4)
+        result = EntrantAnalyzer.analyze_experience_levels(entrants)
+        self.assertAlmostEqual(result['highest_experience_ratio'], 0.4)
+        self.assertEqual(result['experience_distribution'], {0: 0.2, 1: 0.2, 2: 0.2, 3: 0.4})
 
     def test_analyze_experience_levels_empty(self):
-        ratio = EntrantAnalyzer.analyze_experience_levels([])
-        self.assertEqual(ratio, 0.0)
+        result = EntrantAnalyzer.analyze_experience_levels([])
+        self.assertEqual(result['highest_experience_ratio'], 0.0)
+        self.assertEqual(result['experience_distribution'], {})
 
 class TestDataProcessor(unittest.TestCase):
     def setUp(self):
@@ -95,7 +97,8 @@ class TestDataProcessor(unittest.TestCase):
         processed = self.data_processor.process_contests(self.contests)
         self.assertEqual(len(processed), 1)
         self.assertEqual(processed[0]["id"], 2)
-        self.assertLess(processed[0]["high_experience_ratio"], 0.3)
+        self.assertLess(processed[0]["highest_experience_ratio"], 0.3)
+        self.assertIn("experience_distribution", processed[0])
 
 if __name__ == '__main__':
     unittest.main()
