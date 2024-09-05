@@ -1,16 +1,20 @@
 import os
 import logging
+from dotenv import load_dotenv
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 import time
 
 logger = logging.getLogger(__name__)
 
+# Load environment variables from .env.local
+load_dotenv('.env.local')
+
 class SlackNotifier:
     def __init__(self, token=None, default_channel=None):
-        self.token = token or os.environ.get("SLACK_BOT_TOKEN") or "test_token"
+        self.token = token or os.getenv("SLACK_BOT_TOKEN") or "test_token"
         self.client = WebClient(token=self.token)
-        self.default_channel = default_channel or os.environ.get("SLACK_DEFAULT_CHANNEL") or "test_channel"
+        self.default_channel = default_channel or os.getenv("SLACK_DEFAULT_CHANNEL") or "test_channel"
 
     def send_notification(self, message, channel=None, max_retries=3):
         target_channel = channel or self.default_channel
