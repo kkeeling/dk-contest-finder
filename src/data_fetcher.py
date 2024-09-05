@@ -37,7 +37,7 @@ class DataFetcher:
         
         self.last_request_time = time.time()
 
-    def fetch_contests(self, sport: str) -> List[Dict[str, Any]]:
+    def fetch_contests(self, sport: str, limit: int = 100) -> List[Dict[str, Any]]:
         if sport not in self.SUPPORTED_SPORTS:
             print(f"Unsupported sport: {sport}")
             return []
@@ -56,7 +56,7 @@ class DataFetcher:
             
             try:
                 page.goto(url)
-                data = page.query_data("{Contests[]}")
+                data = page.query_data(f"{{Contests[0:{limit}]}}")
                 return data.get("Contests", [])
             except Exception as e:
                 print(f"Error fetching contests: {e}")
@@ -64,10 +64,10 @@ class DataFetcher:
             finally:
                 browser.close()
 
-    def fetch_all_contests(self) -> Dict[str, List[Dict[str, Any]]]:
+    def fetch_all_contests(self, limit: int = 100) -> Dict[str, List[Dict[str, Any]]]:
         all_contests = {}
         for sport in self.SUPPORTED_SPORTS:
-            all_contests[sport] = self.fetch_contests(sport)
+            all_contests[sport] = self.fetch_contests(sport, limit)
         return all_contests
 
     def fetch_contest_details(self, contest_id: str) -> Dict[str, Any]:
