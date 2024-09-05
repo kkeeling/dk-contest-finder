@@ -3,10 +3,10 @@ import time
 import logging
 import signal
 import sys
-from src.data_fetcher import DataFetcher
-from src.data_processor import DataProcessor
-from src.database_manager import DatabaseManager
-from src.slack_notifier import SlackNotifier
+from .data_fetcher import DataFetcher
+from .data_processor import DataProcessor
+from .database_manager import DatabaseManager
+from .slack_notifier import SlackNotifier
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
