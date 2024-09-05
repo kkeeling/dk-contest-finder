@@ -60,6 +60,7 @@ class DataProcessor:
     def process_contests(self, contests: List[Dict[str, Any]]) -> None:
         filtered_contests = ContestFilter.apply_filters(contests)
         
+        processed_contests = []
         for contest in filtered_contests:
             entrants = contest.pop('participants', [])
             analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
@@ -70,8 +71,10 @@ class DataProcessor:
             else:
                 contest['status'] = 'processed'
 
-            self.db_manager.insert_contests([contest])
-            self.db_manager.insert_entrants(contest['id'], entrants)
+            processed_contests.append(contest)
+            self.db_manager.batch_insert_entrants(contest['id'], entrants)
+
+        self.db_manager.batch_insert_contests(processed_contests)
 
     def process_unprocessed_contests(self) -> None:
         unprocessed_contests = self.db_manager.get_unprocessed_contests()
