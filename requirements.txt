@@ -1,6 +1,6 @@
 agentql
 pandas
-supabase-py
+supabase
 slack-sdk
 schedule
 playwright
