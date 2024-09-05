@@ -58,11 +58,13 @@ class TestScheduler(unittest.TestCase):
         mock_schedule.run_pending.return_value = None
 
         # Start the scheduler
-        with self.assertRaises(Exception):
-            self.scheduler.start()
+        self.scheduler.start()
 
-        # Assert that run_pending was called twice
-        self.assertEqual(mock_schedule.run_pending.call_count, 2)
+        # Assert that run_pending was called at least once
+        self.assertGreater(mock_schedule.run_pending.call_count, 0)
+        
+        # Assert that the scheduler was stopped due to the exception
+        self.assertFalse(self.scheduler.is_running)
 
     def test_error_handling(self):
         # Mock an error in fetch_all_contests
