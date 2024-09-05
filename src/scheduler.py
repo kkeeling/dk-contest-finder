@@ -20,7 +20,7 @@ class Scheduler:
         self.slack_notifier = SlackNotifier()
         self.is_running = False
 
-    @with_spinner("Running contest finder", spinner="dots")
+    @with_spinner("Running contest finder", spinner_type="dots")
     def run_contest_finder(self):
         logger.info("Starting contest finder process")
         contests = self.data_fetcher.fetch_all_contests(limit=50)
