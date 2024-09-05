@@ -38,13 +38,13 @@ class Scheduler:
         # Run the contest finder immediately on start
         self.run_contest_finder()
         
-        while self.is_running:
-            try:
-                schedule.run_pending()
-                time.sleep(1)
-            except Exception as e:
-                logger.error(f"Error in scheduler loop: {e}", exc_info=True)
-                time.sleep(5)  # Wait for 5 seconds before retrying
+        # while self.is_running:
+        #     try:
+        #         schedule.run_pending()
+        #         time.sleep(1)
+        #     except Exception as e:
+        #         logger.error(f"Error in scheduler loop: {e}", exc_info=True)
+        #         time.sleep(5)  # Wait for 5 seconds before retrying
 
     def stop(self):
         self.is_running = False
