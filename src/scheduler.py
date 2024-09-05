@@ -1,12 +1,14 @@
 import schedule
 import time
 import logging
+import signal
+import sys
 from src.data_fetcher import DataFetcher
 from src.data_processor import DataProcessor
 from src.database_manager import DatabaseManager
 from src.slack_notifier import SlackNotifier
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class Scheduler:
@@ -15,6 +17,7 @@ class Scheduler:
         self.data_processor = DataProcessor()
         self.db_manager = DatabaseManager()
         self.slack_notifier = SlackNotifier()
+        self.is_running = False
 
     def run_contest_finder(self):
         try:
@@ -26,24 +29,44 @@ class Scheduler:
                 self.slack_notifier.notify_contest(contest)
             logger.info("Contest finder process completed")
         except Exception as e:
-            logger.error(f"Error in contest finder: {e}")
+            logger.error(f"Error in contest finder: {e}", exc_info=True)
 
     def start(self):
+        self.is_running = True
         schedule.every(5).minutes.do(self.run_contest_finder)
         logger.info("Scheduler started. Running contest finder every 5 minutes.")
         
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
+        # Run the contest finder immediately on start
+        self.run_contest_finder()
+        
+        while self.is_running:
+            try:
+                schedule.run_pending()
+                time.sleep(1)
+            except Exception as e:
+                logger.error(f"Error in scheduler loop: {e}", exc_info=True)
+                time.sleep(5)  # Wait for 5 seconds before retrying
 
     def stop(self):
+        self.is_running = False
         schedule.clear()
         logger.info("Scheduler stopped.")
 
+def signal_handler(signum, frame):
+    logger.info(f"Received signal {signum}. Stopping scheduler.")
+    scheduler.stop()
+    sys.exit(0)
+
 if __name__ == "__main__":
     scheduler = Scheduler()
+    
+    # Register signal handlers for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     try:
         scheduler.start()
-    except KeyboardInterrupt:
-        logger.info("Keyboard interrupt received. Stopping scheduler.")
+    except Exception as e:
+        logger.error(f"Unhandled exception in scheduler: {e}", exc_info=True)
+    finally:
         scheduler.stop()
