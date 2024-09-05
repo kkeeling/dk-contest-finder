@@ -7,3 +7,4 @@ playwright
 python-dotenv
 requests
 typing-extensions
+halo

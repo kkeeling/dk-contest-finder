@@ -7,6 +7,7 @@ from .data_fetcher import DataFetcher
 from .data_processor import DataProcessor
 from .database_manager import DatabaseManager
 from .slack_notifier import SlackNotifier
+from .utils import with_spinner
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -19,17 +20,15 @@ class Scheduler:
         self.slack_notifier = SlackNotifier()
         self.is_running = False
 
+    @with_spinner("Running contest finder", spinner="dots")
     def run_contest_finder(self):
-        try:
-            logger.info("Starting contest finder process")
-            contests = self.data_fetcher.fetch_all_contests(limit=50)  # Limit to 50 contests per sport
-            self.data_processor.process_contests(contests)
-            eligible_contests = self.data_processor.process_unprocessed_contests()
-            for contest in eligible_contests:
-                self.slack_notifier.notify_contest(contest)
-            logger.info("Contest finder process completed")
-        except Exception as e:
-            logger.error(f"Error in contest finder: {e}", exc_info=True)
+        logger.info("Starting contest finder process")
+        contests = self.data_fetcher.fetch_all_contests(limit=50)
+        self.data_processor.process_contests(contests)
+        eligible_contests = self.data_processor.process_unprocessed_contests()
+        for contest in eligible_contests:
+            self.slack_notifier.notify_contest(contest)
+        logger.info("Contest finder process completed")
 
     def start(self):
         self.is_running = True

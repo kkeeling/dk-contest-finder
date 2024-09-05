@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from typing import List, Dict, Any
+from .utils import with_spinner
 
 load_dotenv('.env.local')
 
@@ -71,6 +72,7 @@ class DatabaseManager:
             logger.error(f"Error retrieving entrants for contest {contest_id}: {str(e)}")
             raise
 
+    @with_spinner("Inserting contests", spinner="dots")
     def batch_insert_contests(self, contests: List[Dict[str, Any]], batch_size: int = 100) -> None:
         try:
             for i in range(0, len(contests), batch_size):
@@ -94,6 +96,7 @@ class DatabaseManager:
             logger.error(f"Error batch inserting contests: {str(e)}")
             raise
 
+    @with_spinner("Inserting entrants", spinner="dots")
     def batch_insert_entrants(self, contest_id: str, entrants: List[Dict[str, Any]], batch_size: int = 100) -> None:
         try:
             for i in range(0, len(entrants), batch_size):
@@ -106,6 +109,7 @@ class DatabaseManager:
             logger.error(f"Error batch inserting entrants for contest {contest_id}: {str(e)}")
             raise
 
+    @with_spinner("Querying contests", spinner="dots")
     def query_contests(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
         try:
             query = self.supabase.table('contests').select('*')

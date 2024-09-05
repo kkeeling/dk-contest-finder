@@ -4,6 +4,7 @@ from typing import List, Dict, Any
 import agentql
 from playwright.sync_api import sync_playwright
 from urllib.robotparser import RobotFileParser
+from .utils import with_spinner
 
 class DataFetcher:
     BASE_URL = "https://www.draftkings.com"
@@ -37,6 +38,7 @@ class DataFetcher:
         
         self.last_request_time = time.time()
 
+    @with_spinner("Fetching contests", spinner="dots")
     def fetch_contests(self, sport: str, limit: int = 100) -> List[Dict[str, Any]]:
         if sport not in self.SUPPORTED_SPORTS:
             print(f"Unsupported sport: {sport}")
@@ -64,12 +66,14 @@ class DataFetcher:
             finally:
                 browser.close()
 
+    @with_spinner("Fetching all contests", spinner="dots")
     def fetch_all_contests(self, limit: int = 100) -> Dict[str, List[Dict[str, Any]]]:
         all_contests = {}
         for sport in self.SUPPORTED_SPORTS:
             all_contests[sport] = self.fetch_contests(sport, limit)
         return all_contests
 
+    @with_spinner("Fetching contest details", spinner="dots")
     def fetch_contest_details(self, contest_id: str) -> Dict[str, Any]:
         url = self.CONTEST_DETAILS_URL.format(contest_id)
         
