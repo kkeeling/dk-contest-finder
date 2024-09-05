@@ -1,5 +1,7 @@
 import unittest
+from unittest.mock import MagicMock, patch
 from src.data_processor import ContestFilter, DataProcessor, EntrantAnalyzer
+from src.database_manager import DatabaseManager
 
 class TestContestFilter(unittest.TestCase):
     def setUp(self):
@@ -35,6 +37,7 @@ class TestContestFilter(unittest.TestCase):
         filtered_ids = {contest["id"] for contest in filtered}
         self.assertEqual(filtered_ids, {1, 2, 3})
         self.assertNotIn(4, filtered_ids)  # "NFL Millionaire Maker" (not Double Up and more than 10 entrants)
+
 class TestEntrantAnalyzer(unittest.TestCase):
     def test_analyze_experience_levels(self):
         entrants = [
@@ -93,12 +96,25 @@ class TestDataProcessor(unittest.TestCase):
             },
         ]
 
-    def test_process_contests(self):
-        processed = self.data_processor.process_contests(self.contests)
-        self.assertEqual(len(processed), 1)
-        self.assertEqual(processed[0]["id"], 2)
-        self.assertLess(processed[0]["highest_experience_ratio"], 0.3)
-        self.assertIn("experience_distribution", processed[0])
+    @patch.object(DatabaseManager, 'insert_contests')
+    @patch.object(DatabaseManager, 'insert_entrants')
+    def test_process_contests(self, mock_insert_entrants, mock_insert_contests):
+        self.data_processor.process_contests(self.contests)
+        mock_insert_contests.assert_called()
+        mock_insert_entrants.assert_called()
+
+    @patch.object(DatabaseManager, 'get_unprocessed_contests')
+    @patch.object(DatabaseManager, 'get_contest_entrants')
+    @patch.object(DatabaseManager, 'update_contest_status')
+    def test_process_unprocessed_contests(self, mock_update_status, mock_get_entrants, mock_get_unprocessed):
+        mock_get_unprocessed.return_value = [self.contests[1]]  # Return the contest with id 2
+        mock_get_entrants.return_value = self.contests[1]['participants']
+        
+        self.data_processor.process_unprocessed_contests()
+        
+        mock_get_unprocessed.assert_called_once()
+        mock_get_entrants.assert_called_once_with(2)
+        mock_update_status.assert_called_once_with(2, 'ready_to_enter')
 
 if __name__ == '__main__':
     unittest.main()
