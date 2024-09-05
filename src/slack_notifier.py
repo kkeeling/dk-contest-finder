@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 load_dotenv('.env.local')
 
 class SlackNotifier:
-    def __init__(self, token=None):
+    def __init__(self, token=None, client=None):
         self.token = token or os.getenv("SLACK_BOT_TOKEN") or "test_token"
-        self.client = WebClient(token=self.token)
+        self.client = client or WebClient(token=self.token)
         self.channel = "__dk_contests"
 
     def send_notification(self, message, max_retries=3):
