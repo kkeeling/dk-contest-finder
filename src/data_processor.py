@@ -66,9 +66,10 @@ class EntrantAnalyzer:
         }
 
 class DataProcessor:
-    def __init__(self):
+    def __init__(self, data_fetcher):
         print("Initializing DataProcessor")
         self.db_manager = DatabaseManager()
+        self.data_fetcher = data_fetcher
         print("DataProcessor initialized")
 
     @with_spinner("Processing contests", spinner_type="dots")
@@ -82,8 +83,17 @@ class DataProcessor:
             print(f"Processing {len(sport_contests)} contests for {sport}")
             for contest in sport_contests:
                 print(f"Processing contest: {contest.get('id', 'Unknown ID')}")
+                
+                # Fetch contest details
+                contest_details = self.data_fetcher.fetch_contest_details(contest['id'])
+                if not contest_details:
+                    print(f"Failed to fetch details for contest {contest['id']}, skipping")
+                    continue
+                
+                contest.update(contest_details)
                 entrants = contest.pop('participants', [])
                 print(f"Number of entrants: {len(entrants)}")
+                
                 analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
                 print(f"Analysis result: {analysis_result}")
                 contest.update(analysis_result)

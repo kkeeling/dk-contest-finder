@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Scheduler:
     def __init__(self):
         self.data_fetcher = DataFetcher()
-        self.data_processor = DataProcessor()
+        self.data_processor = DataProcessor(self.data_fetcher)
         self.db_manager = DatabaseManager()
         self.slack_notifier = SlackNotifier()
         self.is_running = False
