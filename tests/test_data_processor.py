@@ -32,10 +32,8 @@ class TestContestFilter(unittest.TestCase):
     def test_apply_filters(self):
         filtered = ContestFilter.apply_filters(self.contests)
         self.assertEqual(len(filtered), 3)
-        filtered_ids = [contest["id"] for contest in filtered]
-        self.assertIn(1, filtered_ids)  # "NFL Double Up"
-        self.assertIn(2, filtered_ids)  # "NFL 3-Player" (less than 10 entrants)
-        self.assertIn(3, filtered_ids)  # "NFL 5-Player" (less than 10 entrants)
+        filtered_ids = {contest["id"] for contest in filtered}
+        self.assertEqual(filtered_ids, {1, 2, 3})
         self.assertNotIn(4, filtered_ids)  # "NFL Millionaire Maker" (not Double Up and more than 10 entrants)
 class TestEntrantAnalyzer(unittest.TestCase):
     def test_analyze_experience_levels(self):

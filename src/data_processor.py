@@ -11,9 +11,10 @@ class ContestFilter:
 
     @classmethod
     def apply_filters(cls, contests: List[Dict[str, Any]], max_entrants: int = 10, title_keyword: str = "Double Up") -> List[Dict[str, Any]]:
-        filtered_by_entrants = cls.filter_by_entrants(contests, max_entrants)
-        filtered_by_title = cls.filter_by_title(contests, title_keyword)
-        return list(set(filtered_by_entrants + filtered_by_title))
+        filtered_by_entrants = set(contest['id'] for contest in cls.filter_by_entrants(contests, max_entrants))
+        filtered_by_title = set(contest['id'] for contest in cls.filter_by_title(contests, title_keyword))
+        filtered_ids = filtered_by_entrants.union(filtered_by_title)
+        return [contest for contest in contests if contest['id'] in filtered_ids]
 
 class EntrantAnalyzer:
     @staticmethod
