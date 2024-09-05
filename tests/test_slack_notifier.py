@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from src.slack_notifier import SlackNotifier
+from slack_sdk.errors import SlackApiError
 
 class TestSlackNotifier(unittest.TestCase):
     def setUp(self):
