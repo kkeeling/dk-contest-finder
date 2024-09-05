@@ -82,8 +82,8 @@ class DatabaseManager:
                         'title': contest.get('title'),
                         'entry_fee': contest.get('entry_fee', 0),  # Default to 0 if not provided
                         'total_prizes': contest.get('total_prizes'),
-                        'entries_current': contest.get('entries', {}).get('current'),
-                        'entries_maximum': contest.get('entries', {}).get('maximum'),
+                        'current_entries': contest.get('entries', {}).get('current'),
+                        'maximum_entries': contest.get('entries', {}).get('maximum'),
                         'status': contest.get('status', 'unprocessed'),
                         'highest_experience_ratio': contest.get('highest_experience_ratio'),
                     }
