@@ -91,19 +91,21 @@ class DataFetcher:
                 page.goto(url)
                 QUERY = """
                 {
-                    contest_info {
+                    contest_info: {
                         title
                         entry_fee
                         total_prizes
-                        entries {
+                        entries: {
                             current
                             maximum
                         }
                     }
-                    participants[] {
-                        username
-                        experience_level
-                    }
+                    participants: [
+                        {
+                            username
+                            experience_level
+                        }
+                    ]
                 }
                 """
                 contest_data = page.query_data(QUERY)
