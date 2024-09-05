@@ -10,7 +10,7 @@ class DataFetcher:
     BASE_URL = "https://www.draftkings.com"
     LOBBY_URL = f"{BASE_URL}/lobby/getcontests"
     CONTEST_DETAILS_URL = f"{BASE_URL}/contest/detailspop?contestId={{}}"
-    SUPPORTED_SPORTS = ["NFL", "NHL", "NBA", "MLB", "TEN", "SOC", "MMA", "GOL"]
+    SUPPORTED_SPORTS = ["NFL"]
     
     def __init__(self, min_delay: float = 1.0, max_delay: float = 3.0):
         self.min_delay = min_delay
