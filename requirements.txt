@@ -5,3 +5,4 @@ slack-sdk>=3.0
 schedule
 playwright
 python-dotenv
+unittest
