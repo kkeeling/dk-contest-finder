@@ -16,7 +16,16 @@ class TestDatabaseManager(unittest.TestCase):
     def test_insert_contests(self, mock_get_supabase):
         mock_supabase = MagicMock()
         mock_get_supabase.return_value = mock_supabase
-        contests = [{'id': '1', 'title': 'Test Contest'}]
+        contests = [{
+            'id': '1',
+            'title': 'Test Contest',
+            'entry_fee': 10,
+            'total_prizes': 100,
+            'entries_current': 5,
+            'entries_maximum': 10,
+            'status': 'unprocessed',
+            'highest_experience_ratio': 0.2
+        }]
         self.db_manager.insert_contests(contests)
         mock_supabase.table.assert_called_with('contests')
         mock_supabase.table().insert.assert_called_with(contests[0])
@@ -70,6 +79,7 @@ class TestDatabaseManager(unittest.TestCase):
             self.assertIn('entries_current', processed_contest)
             self.assertIn('entries_maximum', processed_contest)
             self.assertIn('status', processed_contest)
+            self.assertIn('highest_experience_ratio', processed_contest)
 
     @patch('src.database_manager.DatabaseManager.get_supabase')
     def test_batch_insert_entrants(self, mock_get_supabase):
