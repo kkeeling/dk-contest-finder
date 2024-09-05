@@ -58,7 +58,7 @@ class DataProcessor:
     def __init__(self):
         self.db_manager = DatabaseManager()
 
-    @with_spinner("Processing contests", spinner="dots")
+    @with_spinner("Processing contests", spinner_type="dots")
     def process_contests(self, contests: List[Dict[str, Any]]) -> None:
         filtered_contests = ContestFilter.apply_filters(contests)
         
@@ -78,7 +78,7 @@ class DataProcessor:
 
         self.db_manager.batch_insert_contests(processed_contests)
 
-    @with_spinner("Processing unprocessed contests", spinner="dots")
+    @with_spinner("Processing unprocessed contests", spinner_type="dots")
     def process_unprocessed_contests(self) -> None:
         unprocessed_contests = self.db_manager.get_unprocessed_contests()
         for contest in unprocessed_contests:
