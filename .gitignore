@@ -21,3 +21,6 @@ ENV/
 .DS_Store
 Thumbs.db
 .env.local
+
+# Log files
+*.log
