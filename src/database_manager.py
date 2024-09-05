@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 
 class DatabaseManager:
     def __init__(self):
+        self.supabase = None
+        self.initialize_supabase()
+
+    def initialize_supabase(self):
         url: str = os.getenv("SUPABASE_URL")
         key: str = os.getenv("SUPABASE_KEY")
         if not url or not key:
@@ -18,6 +22,8 @@ class DatabaseManager:
         self.supabase: Client = create_client(url, key)
 
     def get_supabase(self) -> Client:
+        if not self.supabase:
+            self.initialize_supabase()
         return self.supabase
 
     def insert_contests(self, contests: List[Dict[str, Any]]) -> None:
