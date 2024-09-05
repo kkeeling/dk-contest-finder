@@ -2,6 +2,8 @@ import time
 import random
 from typing import List, Dict, Any
 import requests
+from playwright.sync_api import sync_playwright
+import agentql
 from .utils import with_spinner
 
 print("DataFetcher module imported")
