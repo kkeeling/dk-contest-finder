@@ -3,10 +3,10 @@ import time
 import logging
 import signal
 import sys
-from src.data_fetcher import DataFetcher
-from src.data_processor import DataProcessor
-from src.database_manager import DatabaseManager
-from src.slack_notifier import SlackNotifier
+from .data_fetcher import DataFetcher
+from .data_processor import DataProcessor
+from .database_manager import DatabaseManager
+from .slack_notifier import SlackNotifier
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -33,8 +33,8 @@ class Scheduler:
 
     def start(self):
         self.is_running = True
-        schedule.every(5).minutes.do(self.run_contest_finder)
-        logger.info("Scheduler started. Running contest finder every 5 minutes.")
+        schedule.every(1).minutes.do(self.run_contest_finder)
+        logger.info("Scheduler started. Running contest finder every 1 minute.")
         
         # Run the contest finder immediately on start
         self.run_contest_finder()
