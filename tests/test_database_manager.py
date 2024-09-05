@@ -56,15 +56,16 @@ class TestDatabaseManager(unittest.TestCase):
         # Check if the processed contests have all required fields
         calls = self.db_manager.supabase.table().insert.call_args_list
         for i, call in enumerate(calls):
-            processed_contest = call[0][0]
-            self.assertIn('id', processed_contest)
-            self.assertIn('title', processed_contest)
-            self.assertIn('entry_fee', processed_contest)
-            self.assertIn('total_prizes', processed_contest)
-            self.assertIn('current_entries', processed_contest)
-            self.assertIn('maximum_entries', processed_contest)
-            self.assertIn('status', processed_contest)
-            self.assertIn('highest_experience_ratio', processed_contest)
+            processed_contests = call[0][0]
+            for processed_contest in processed_contests:
+                self.assertIn('id', processed_contest)
+                self.assertIn('title', processed_contest)
+                self.assertIn('entry_fee', processed_contest)
+                self.assertIn('total_prizes', processed_contest)
+                self.assertIn('current_entries', processed_contest)
+                self.assertIn('maximum_entries', processed_contest)
+                self.assertIn('status', processed_contest)
+                self.assertIn('highest_experience_ratio', processed_contest)
 
     def test_batch_insert_entrants(self):
         entrants = [{'username': 'user1', 'experience_level': 1}, {'username': 'user2', 'experience_level': 2}]
