@@ -12,8 +12,10 @@ class TestDatabaseManager(unittest.TestCase):
         db_manager = DatabaseManager()
         self.assertIsNotNone(db_manager.supabase)
 
-    @patch('src.database_manager.DatabaseManager.supabase')
-    def test_insert_contests(self, mock_supabase):
+    @patch('src.database_manager.DatabaseManager.get_supabase')
+    def test_insert_contests(self, mock_get_supabase):
+        mock_supabase = MagicMock()
+        mock_get_supabase.return_value = mock_supabase
         contests = [{'id': '1', 'title': 'Test Contest'}]
         self.db_manager.insert_contests(contests)
         mock_supabase.table.assert_called_with('contests')
@@ -46,8 +48,10 @@ class TestDatabaseManager(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]['username'], 'user1')
 
-    @patch('src.database_manager.DatabaseManager.supabase')
-    def test_batch_insert_contests(self, mock_supabase):
+    @patch('src.database_manager.DatabaseManager.get_supabase')
+    def test_batch_insert_contests(self, mock_get_supabase):
+        mock_supabase = MagicMock()
+        mock_get_supabase.return_value = mock_supabase
         contests = [{'id': '1', 'title': 'Test Contest 1'}, {'id': '2', 'title': 'Test Contest 2'}]
         self.db_manager.batch_insert_contests(contests, batch_size=1)
         self.assertEqual(mock_supabase.table().insert.call_count, 2)

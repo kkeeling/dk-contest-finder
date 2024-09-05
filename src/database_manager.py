@@ -17,6 +17,9 @@ class DatabaseManager:
             raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in .env.local file")
         self.supabase: Client = create_client(url, key)
 
+    def get_supabase(self) -> Client:
+        return self.supabase
+
     def insert_contests(self, contests: List[Dict[str, Any]]) -> None:
         try:
             for contest in contests:
