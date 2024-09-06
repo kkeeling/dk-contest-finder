@@ -1,4 +1,5 @@
 import unittest
+import requests
 from unittest.mock import patch, MagicMock
 from bs4 import BeautifulSoup
 from src.data_fetcher import DataFetcher
