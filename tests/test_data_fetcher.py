@@ -41,7 +41,7 @@ class TestDataFetcher(unittest.TestCase):
             self.assertIn(sport, result)
             self.assertEqual(result[sport], [{"id": 1, "name": "Test Contest"}])
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     @patch('src.data_fetcher.DataFetcher._wait_between_requests')
     def test_fetch_contest_details(self, mock_wait, mock_get):
         mock_response = MagicMock()
@@ -75,6 +75,13 @@ class TestDataFetcher(unittest.TestCase):
             ]
         }
         self.assertEqual(result, expected_result)
+
+    @patch('requests.Session.get')
+    @patch('src.data_fetcher.DataFetcher._wait_between_requests')
+    def test_fetch_contest_details_error(self, mock_wait, mock_get):
+        mock_get.side_effect = requests.RequestException("Test error")
+        result = self.data_fetcher.fetch_contest_details("123")
+        self.assertEqual(result, {})
 
     def test_parse_currency(self):
         self.assertEqual(self.data_fetcher._parse_currency('$10'), 10.0)

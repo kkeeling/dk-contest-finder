@@ -110,6 +110,64 @@ class DataFetcher:
             logger.error(f"Unexpected error in fetch_contest_details: {e}", exc_info=True)
             return {}
 
+    def _parse_contest_details(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        try:
+            contest_info = self._extract_contest_info(soup)
+            participants = self._extract_participants(soup)
+            
+            logger.debug(f"Extracted contest info: {contest_info}")
+            logger.debug(f"Extracted participants: {participants}")
+            
+            if not contest_info or participants is None:
+                logger.error("Failed to extract contest info or participants")
+                return {}
+            
+            parsed_data = {
+                'title': contest_info.get('name', ''),
+                'entry_fee': self._parse_currency(contest_info.get('entry_fee', '0')),
+                'total_prizes': self._parse_currency(contest_info.get('total_prizes', '0')),
+                'entries': {
+                    'current': int(contest_info.get('entries', '0')),
+                    'maximum': int(contest_info.get('max_entries', '0'))
+                },
+                'participants': participants
+            }
+            logger.debug(f"Parsed contest details: {parsed_data}")
+            return parsed_data
+        except Exception as e:
+            logger.error(f"Error in _parse_contest_details: {e}", exc_info=True)
+            return {}
+
+    def _extract_contest_info(self, soup: BeautifulSoup) -> Dict[str, str]:
+        contest_info = {}
+        try:
+            contest_info['name'] = soup.select_one('h2[data-test-id="contest-name"]').text.strip()
+            contest_info['entries'] = soup.select_one('span.contest-entries').text.strip()
+            contest_info['max_entries'] = soup.select_one('span[data-test-id="contest-seats"]').text.strip()
+            contest_info['entry_fee'] = soup.select_one('p[data-test-id="contest-entry-fee"]').text.strip()
+            contest_info['total_prizes'] = soup.select_one('p[data-test-id="contest-total-prizes"]').text.strip()
+        except AttributeError as e:
+            logger.error(f"Error extracting contest info: {e}")
+        return contest_info
+
+    def _extract_participants(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        participants = []
+        try:
+            entrants_table = soup.select_one('table#entrants-table')
+            if entrants_table:
+                for cell in entrants_table.select('td:not(.empty-user)'):
+                    username = cell.select_one('span.entrant-username').text.strip()
+                    experience_icon = cell.select_one('span[class^="icon-experienced-user-"]')
+                    experience_level = self._map_experience_level(experience_icon['class'][0].split('-')[-1] if experience_icon else '0')
+                    
+                    participants.append({
+                        'username': username,
+                        'experience_level': experience_level
+                    })
+        except Exception as e:
+            logger.error(f"Error extracting participants: {e}")
+        return participants
+
     @with_spinner("Fetching multiple contest details", spinner_type="dots")
     def fetch_multiple_contest_details(self, contest_ids: List[str]) -> List[Dict[str, Any]]:
         logger.info(f"Fetching details for {len(contest_ids)} contests")
