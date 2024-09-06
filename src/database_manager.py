@@ -72,28 +72,33 @@ class DatabaseManager:
             logger.error(f"Error retrieving entrants for contest {contest_id}: {str(e)}")
             raise
 
+    @with_spinner("Inserting contest", spinner_type="dots")
+    def insert_contest(self, contest: Dict[str, Any]) -> None:
+        try:
+            processed_contest = {
+                'id': contest.get('id'),
+                'title': contest.get('title'),
+                'entry_fee': contest.get('entry_fee', 0),
+                'total_prizes': contest.get('total_prizes', 0),
+                'current_entries': contest.get('entries', {}).get('current', 0),
+                'maximum_entries': contest.get('entries', {}).get('maximum', 0),
+                'status': contest.get('status', 'unprocessed'),
+                'highest_experience_ratio': contest.get('highest_experience_ratio'),
+            }
+            self.supabase.table('contests').insert(processed_contest).execute()
+            logger.info(f"Successfully inserted contest {contest['id']}")
+        except Exception as e:
+            logger.error(f"Error inserting contest {contest['id']}: {str(e)}")
+            raise
+
     @with_spinner("Inserting contests", spinner_type="dots")
     def batch_insert_contests(self, contests: List[Dict[str, Any]], batch_size: int = 100) -> None:
         try:
-            for i in range(0, len(contests), batch_size):
-                batch = contests[i:i+batch_size]
-                processed_batch = []
-                for contest in batch:
-                    processed_contest = {
-                        'id': contest.get('id'),
-                        'title': contest.get('n'),
-                        'entry_fee': contest.get('a', 0),  # Default to 0 if not provided
-                        'total_prizes': contest.get('po', 0),
-                        'current_entries': contest.get('nt', 0),
-                        'maximum_entries': contest.get('m', 0),
-                        'status': contest.get('status', 'unprocessed'),
-                        'highest_experience_ratio': contest.get('highest_experience_ratio'),
-                    }
-                    processed_batch.append(processed_contest)
-                self.supabase.table('contests').insert(processed_batch).execute()
-            logger.info(f"Successfully batch inserted {len(contests)} contests")
+            for contest in contests:
+                self.insert_contest(contest)
+            logger.info(f"Successfully inserted {len(contests)} contests")
         except Exception as e:
-            logger.error(f"Error batch inserting contests: {str(e)}")
+            logger.error(f"Error inserting contests: {str(e)}")
             raise
 
     @with_spinner("Inserting entrants", spinner_type="dots")

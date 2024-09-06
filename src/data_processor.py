@@ -78,7 +78,6 @@ class DataProcessor:
         filtered_contests = ContestFilter.apply_filters(contests)
         print(f"Filtered contests: {sum(len(sport_contests) for sport_contests in filtered_contests.values())}")
         
-        processed_contests = []
         for sport, sport_contests in filtered_contests.items():
             print(f"Processing {len(sport_contests)} contests for {sport}")
             for contest in sport_contests:
@@ -101,13 +100,14 @@ class DataProcessor:
                 contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] < 0.3 else 'processed'
                 print(f"Contest status: {contest['status']}")
 
-                processed_contests.append(contest)
+                # Insert the contest immediately
+                self.db_manager.insert_contest(contest)
+                print(f"Inserted contest {contest['id']}")
+
                 if entrants:
                     print(f"Inserting {len(entrants)} entrants for contest {contest['id']}")
                     self.db_manager.batch_insert_entrants(contest['id'], entrants)
 
-        print(f"Inserting {len(processed_contests)} processed contests")
-        self.db_manager.batch_insert_contests(processed_contests)
         print("Finished processing contests")
 
     @with_spinner("Processing unprocessed contests", spinner_type="dots")
