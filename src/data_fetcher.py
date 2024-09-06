@@ -94,17 +94,20 @@ class DataFetcher:
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'lxml')
             
+            logger.debug(f"Response content: {response.text[:500]}...")  # Log first 500 characters of response
+            
             contest_data = self._parse_contest_details(soup)
             if not contest_data:
                 logger.error("Failed to parse contest details")
                 return {}
             logger.info("Contest details parsed successfully")
+            logger.debug(f"Parsed contest data: {contest_data}")
             return contest_data
         except requests.RequestException as e:
             logger.error(f"Error fetching contest details: {e}")
             return {}
         except Exception as e:
-            logger.error(f"Unexpected error in fetch_contest_details: {e}")
+            logger.error(f"Unexpected error in fetch_contest_details: {e}", exc_info=True)
             return {}
 
     @with_spinner("Fetching multiple contest details", spinner_type="dots")
@@ -128,11 +131,14 @@ class DataFetcher:
             contest_info = self._extract_contest_info(soup)
             participants = self._extract_participants(soup)
             
+            logger.debug(f"Extracted contest info: {contest_info}")
+            logger.debug(f"Extracted participants: {participants}")
+            
             if not contest_info or not participants:
                 logger.error("Failed to extract contest info or participants")
                 return {}
             
-            return {
+            parsed_data = {
                 'title': contest_info.get('name', ''),
                 'entry_fee': self._parse_currency(contest_info.get('entry_fee', '0')),
                 'total_prizes': self._parse_currency(contest_info.get('total_prizes', '0')),
@@ -142,8 +148,10 @@ class DataFetcher:
                 },
                 'participants': participants
             }
+            logger.debug(f"Parsed contest details: {parsed_data}")
+            return parsed_data
         except Exception as e:
-            logger.error(f"Error in _parse_contest_details: {e}")
+            logger.error(f"Error in _parse_contest_details: {e}", exc_info=True)
             return {}
 
     def _extract_contest_info(self, soup: BeautifulSoup) -> Dict[str, str]:
