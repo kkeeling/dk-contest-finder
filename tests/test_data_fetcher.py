@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
+from bs4 import BeautifulSoup
 from src.data_fetcher import DataFetcher
 
 class TestDataFetcher(unittest.TestCase):
@@ -11,28 +12,17 @@ class TestDataFetcher(unittest.TestCase):
         url = self.data_fetcher._construct_url("NFL")
         self.assertEqual(url, "https://www.draftkings.com/lobby/getcontests?sport=NFL")
 
-    def test_respect_robots_txt(self):
-        with patch.object(self.data_fetcher.rp, 'can_fetch', return_value=True):
-            self.assertTrue(self.data_fetcher._respect_robots_txt("https://www.draftkings.com/test"))
-        with patch.object(self.data_fetcher.rp, 'can_fetch', return_value=False):
-            self.assertFalse(self.data_fetcher._respect_robots_txt("https://www.draftkings.com/test"))
-
     @patch('time.sleep')
     def test_wait_between_requests(self, mock_sleep):
         self.data_fetcher._wait_between_requests()
         mock_sleep.assert_called()
 
-    @patch('src.data_fetcher.sync_playwright')
-    @patch('src.data_fetcher.DataFetcher._respect_robots_txt', return_value=True)
+    @patch('requests.get')
     @patch('src.data_fetcher.DataFetcher._wait_between_requests')
-    def test_fetch_contests(self, mock_wait, mock_respect_robots, mock_sync_playwright):
-        mock_page = MagicMock()
-        mock_page.query_data.return_value = {"Contests": [{"id": 1, "name": "Test Contest"}]}
-        mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
-        mock_playwright = MagicMock()
-        mock_playwright.chromium.launch.return_value = mock_browser
-        mock_sync_playwright.return_value.__enter__.return_value = mock_playwright
+    def test_fetch_contests(self, mock_wait, mock_get):
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"Contests": [{"id": 1, "name": "Test Contest"}]}
+        mock_get.return_value = mock_response
 
         result = self.data_fetcher.fetch_contests("NFL")
         self.assertEqual(result, [{"id": 1, "name": "Test Contest"}])
@@ -51,51 +41,54 @@ class TestDataFetcher(unittest.TestCase):
             self.assertIn(sport, result)
             self.assertEqual(result[sport], [{"id": 1, "name": "Test Contest"}])
 
-    @patch('src.data_fetcher.sync_playwright')
-    @patch('src.data_fetcher.DataFetcher._respect_robots_txt', return_value=True)
+    @patch('requests.get')
     @patch('src.data_fetcher.DataFetcher._wait_between_requests')
-    def test_fetch_contest_details(self, mock_wait, mock_respect_robots, mock_sync_playwright):
-        mock_page = MagicMock()
-        mock_page.query_data.return_value = {
-            'contest_info': {
-                'title': 'Test Contest',
-                'entry_fee': 10,
-                'total_prizes': 100,
-                'entries': {'current': 5, 'maximum': 10}
-            },
-            'participants': [
-                {'username': 'user1', 'experience_level': 'Beginner'},
-                {'username': 'user2', 'experience_level': 'High'}
-            ]
-        }
-        mock_browser = MagicMock()
-        mock_browser.new_page.return_value = mock_page
-        mock_playwright = MagicMock()
-        mock_playwright.chromium.launch.return_value = mock_browser
-        mock_sync_playwright.return_value.__enter__.return_value = mock_playwright
+    def test_fetch_contest_details(self, mock_wait, mock_get):
+        mock_response = MagicMock()
+        mock_response.text = '''
+        <html>
+            <h2 data-test-id="contest-name">Test Contest</h2>
+            <span class="contest-entries">5</span>
+            <span data-test-id="contest-seats">10</span>
+            <p data-test-id="contest-entry-fee">$10</p>
+            <p data-test-id="contest-total-prizes">$100</p>
+            <table id="entrants-table">
+                <tr>
+                    <td><span class="entrant-username">user1</span><span class="icon-experienced-user-1"></span></td>
+                    <td><span class="entrant-username">user2</span><span class="icon-experienced-user-5"></span></td>
+                </tr>
+            </table>
+        </html>
+        '''
+        mock_get.return_value = mock_response
 
         result = self.data_fetcher.fetch_contest_details("123")
 
         expected_result = {
-            'contest_info': {
-                'title': 'Test Contest',
-                'entry_fee': 10,
-                'total_prizes': 100,
-                'entries': {'current': 5, 'maximum': 10}
-            },
+            'title': 'Test Contest',
+            'entry_fee': 10.0,
+            'total_prizes': 100.0,
+            'entries': {'current': 5, 'maximum': 10},
             'participants': [
-                {'username': 'user1', 'experience_level': 0},
+                {'username': 'user1', 'experience_level': 1},
                 {'username': 'user2', 'experience_level': 3}
             ]
         }
         self.assertEqual(result, expected_result)
 
+    def test_parse_currency(self):
+        self.assertEqual(self.data_fetcher._parse_currency('$10'), 10.0)
+        self.assertEqual(self.data_fetcher._parse_currency('$1,000'), 1000.0)
+        self.assertEqual(self.data_fetcher._parse_currency('1,000'), 1000.0)
+
     def test_map_experience_level(self):
-        self.assertEqual(self.data_fetcher._map_experience_level('Beginner'), 0)
-        self.assertEqual(self.data_fetcher._map_experience_level('Low'), 1)
-        self.assertEqual(self.data_fetcher._map_experience_level('Medium'), 2)
-        self.assertEqual(self.data_fetcher._map_experience_level('High'), 3)
-        self.assertEqual(self.data_fetcher._map_experience_level('Unknown'), 0)
+        self.assertEqual(self.data_fetcher._map_experience_level('0'), 0)
+        self.assertEqual(self.data_fetcher._map_experience_level('1'), 1)
+        self.assertEqual(self.data_fetcher._map_experience_level('2'), 2)
+        self.assertEqual(self.data_fetcher._map_experience_level('3'), 3)
+        self.assertEqual(self.data_fetcher._map_experience_level('4'), 3)
+        self.assertEqual(self.data_fetcher._map_experience_level('5'), 3)
+        self.assertEqual(self.data_fetcher._map_experience_level('unknown'), 0)
 
 if __name__ == '__main__':
     unittest.main()
