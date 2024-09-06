@@ -15,16 +15,23 @@ class ContestFilter:
         return {sport: [contest for contest in sport_contests if title_keyword.lower() in contest.get('n', '').lower()]
                 for sport, sport_contests in contests.items()}
 
+    @staticmethod
+    def filter_by_entry_fee(contests: Dict[str, List[Dict[str, Any]]], max_entry_fee: float) -> Dict[str, List[Dict[str, Any]]]:
+        return {sport: [contest for contest in sport_contests if contest.get('a', 0) <= max_entry_fee]
+                for sport, sport_contests in contests.items()}
+
     @classmethod
-    def apply_filters(cls, contests: Dict[str, List[Dict[str, Any]]], max_entrants: int = 5, title_keyword: str = "Double Up") -> Dict[str, List[Dict[str, Any]]]:
+    def apply_filters(cls, contests: Dict[str, List[Dict[str, Any]]], max_entrants: int = 5, title_keyword: str = "Double Up", max_entry_fee: float = 100.0) -> Dict[str, List[Dict[str, Any]]]:
         filtered_by_entrants = {sport: set(contest['id'] for contest in sport_contests)
                                 for sport, sport_contests in cls.filter_by_entrants(contests, max_entrants).items()}
         filtered_by_title = {sport: set(contest['id'] for contest in sport_contests)
                              for sport, sport_contests in cls.filter_by_title(contests, title_keyword).items()}
+        filtered_by_entry_fee = {sport: set(contest['id'] for contest in sport_contests)
+                                 for sport, sport_contests in cls.filter_by_entry_fee(contests, max_entry_fee).items()}
         
         filtered_contests = {}
         for sport in contests.keys():
-            filtered_ids = filtered_by_entrants.get(sport, set()).union(filtered_by_title.get(sport, set()))
+            filtered_ids = filtered_by_entrants.get(sport, set()).union(filtered_by_title.get(sport, set())).intersection(filtered_by_entry_fee.get(sport, set()))
             filtered_contests[sport] = [contest for contest in contests[sport] if contest['id'] in filtered_ids]
         
         return filtered_contests
