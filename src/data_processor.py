@@ -98,15 +98,13 @@ class DataProcessor:
                 print(f"Analysis result: {analysis_result}")
                 contest.update(analysis_result)
 
-                if analysis_result['highest_experience_ratio'] < 0.3:
-                    contest['status'] = 'ready_to_enter'
-                else:
-                    contest['status'] = 'processed'
+                contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] < 0.3 else 'processed'
                 print(f"Contest status: {contest['status']}")
 
                 processed_contests.append(contest)
-                print(f"Inserting {len(entrants)} entrants for contest {contest['id']}")
-                self.db_manager.batch_insert_entrants(contest['id'], entrants)
+                if entrants:
+                    print(f"Inserting {len(entrants)} entrants for contest {contest['id']}")
+                    self.db_manager.batch_insert_entrants(contest['id'], entrants)
 
         print(f"Inserting {len(processed_contests)} processed contests")
         self.db_manager.batch_insert_contests(processed_contests)

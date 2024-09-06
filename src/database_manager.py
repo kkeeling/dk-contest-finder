@@ -101,13 +101,11 @@ class DatabaseManager:
         try:
             for i in range(0, len(entrants), batch_size):
                 batch = entrants[i:i+batch_size]
-                for entrant in batch:
-                    entrant['contest_id'] = contest_id
-                self.supabase.table('entrants').insert(batch).execute()
+                data = [{"contest_id": contest_id, **entrant} for entrant in batch]
+                self.supabase.table("entrants").insert(data).execute()
             logger.info(f"Successfully batch inserted {len(entrants)} entrants for contest {contest_id}")
         except Exception as e:
             logger.error(f"Error batch inserting entrants for contest {contest_id}: {str(e)}")
-            raise
 
     @with_spinner("Querying contests", spinner_type="dots")
     def query_contests(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
