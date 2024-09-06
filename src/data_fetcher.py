@@ -3,6 +3,7 @@ import random
 from typing import List, Dict, Any
 import requests
 from playwright.sync_api import sync_playwright
+from playwright_dompath.dompath_sync import xpath_path
 import agentql
 from .utils import with_spinner
 
@@ -91,11 +92,21 @@ class DataFetcher:
                 print(f"Navigating to URL: {url}")
                 page.goto(url)
                 QUERY = """
-                {
-                    contest_info
-                    participants
-                }
+                    {
+                        contest_info {
+                            title
+                            entry_fee
+                            total_prizes
+                        }
+                        num_entries
+                        total_entries
+                        entrants_list(all attributes)[] {
+                            entrant_username
+                            icon
+                        }
+                    }                
                 """
+
                 print("Executing AgentQL query")
                 contest_data = page.query_data(QUERY)
                 print("AgentQL query executed successfully")
@@ -105,19 +116,19 @@ class DataFetcher:
                     'entry_fee': contest_data.get('contest_info', {}).get('entry_fee', 0),
                     'total_prizes': contest_data.get('contest_info', {}).get('total_prizes', 0),
                     'entries': {
-                        'current': contest_data.get('contest_info', {}).get('entries', {}).get('current', 0),
-                        'maximum': contest_data.get('contest_info', {}).get('entries', {}).get('maximum', 0)
+                        'current': contest_data.get('num_entries', 0),
+                        'maximum': contest_data.get('total_entries', 0)
                     },
                     'participants': []
                 }
 
                 # Process participant data
-                participants = contest_data.get('participants', [])
+                participants = contest_data.get('entrants_list', [])
                 print(f"Processing {len(participants)} participants")
                 for participant in participants:
                     experience_level = self._map_experience_level(participant.get('experience_level', ''))
                     processed_data['participants'].append({
-                        'username': participant.get('username', ''),
+                        'username': participant.get('entrant_username', ''),
                         'experience_level': experience_level
                     })
 

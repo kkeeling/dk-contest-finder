@@ -6,3 +6,4 @@ python-dotenv
 requests
 typing-extensions
 halo
+playwright_dompath
