@@ -201,8 +201,8 @@ class DataFetcher:
                 'entry_fee': self._parse_currency(contest_info.get('entry_fee', '0')),
                 'total_prizes': self._parse_currency(contest_info.get('total_prizes', '0')),
                 'entries': {
-                    'current': int(contest_info.get('entries', '0')),
-                    'maximum': int(contest_info.get('max_entries', '0'))
+                    'current': self._parse_int_value(contest_info.get('entries', '0')),
+                    'maximum': self._parse_int_value(contest_info.get('max_entries', '0'))
                 },
                 'participants': participants
             }
@@ -211,6 +211,18 @@ class DataFetcher:
         except Exception as e:
             logger.error(f"Error in _parse_contest_details: {e}", exc_info=True)
             return {}
+
+    def _parse_int_value(self, value: str) -> int:
+        try:
+            return int(value.replace(',', ''))
+        except ValueError:
+            if 'K' in value:
+                return int(float(value.replace('K', '')) * 1000)
+            elif 'M' in value:
+                return int(float(value.replace('M', '')) * 1000000)
+            else:
+                logger.warning(f"Unable to parse int value: {value}")
+                return 0
 
     def _extract_contest_info(self, soup: BeautifulSoup) -> Dict[str, str]:
         return {
