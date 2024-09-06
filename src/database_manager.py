@@ -114,13 +114,19 @@ class DatabaseManager:
     @with_spinner("Inserting entrants", spinner_type="dots")
     def batch_insert_entrants(self, contest_id: str, entrants: List[Dict[str, Any]], batch_size: int = 100) -> None:
         try:
+            inserted_count = 0
             for i in range(0, len(entrants), batch_size):
                 batch = entrants[i:i+batch_size]
-                data = [{"contest_id": contest_id, **entrant} for entrant in batch]
-                self.supabase.table("entrants").insert(data).execute()
-            logger.info(f"Successfully batch inserted {len(entrants)} entrants for contest {contest_id}")
+                for entrant in batch:
+                    # Check if entrant already exists
+                    existing_entrant = self.supabase.table("entrants").select("id").eq("contest_id", contest_id).eq("username", entrant["username"]).execute()
+                    if not existing_entrant.data:
+                        # Insert only if entrant doesn't exist
+                        self.supabase.table("entrants").insert({"contest_id": contest_id, **entrant}).execute()
+                        inserted_count += 1
+            logger.info(f"Successfully inserted {inserted_count} new entrants for contest {contest_id}")
         except Exception as e:
-            logger.error(f"Error batch inserting entrants for contest {contest_id}: {str(e)}")
+            logger.error(f"Error inserting entrants for contest {contest_id}: {str(e)}")
 
     @with_spinner("Querying contests", spinner_type="dots")
     def query_contests(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
