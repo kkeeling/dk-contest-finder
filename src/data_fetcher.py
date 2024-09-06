@@ -46,38 +46,38 @@ class DataFetcher:
         self.last_request_time = time.time()
 
     @with_spinner("Fetching contests", spinner_type="dots")
-    def fetch_contests(self, sport: str, limit: int = 100) -> List[Dict[str, Any]]:
-        print(f"Fetching contests for sport: {sport}, limit: {limit}")
+    def fetch_contests(self, sport: str) -> List[Dict[str, Any]]:
+        logger.info(f"Fetching contests for sport: {sport}")
         if sport not in self.SUPPORTED_SPORTS:
-            print(f"Unsupported sport: {sport}")
+            logger.warning(f"Unsupported sport: {sport}")
             return []
         
         url = self._construct_url(sport)
-        print(f"Constructed URL: {url}")
+        logger.debug(f"Constructed URL: {url}")
         
         self._wait_between_requests()
 
         try:
-            print(f"Sending GET request to {url}")
-            response = requests.get(url)
+            logger.debug(f"Sending GET request to {url}")
+            response = self.session.get(url)
             response.raise_for_status()
             data = response.json()
             contests = data.get("Contests", [])
-            print(f"Fetched {len(contests)} contests, returning {min(len(contests), limit)}")
-            return contests[:limit]
+            logger.info(f"Fetched {len(contests)} contests for {sport}")
+            return contests
         except requests.RequestException as e:
-            print(f"Error fetching contests: {e}")
+            logger.error(f"Error fetching contests: {e}")
             return []
 
     @with_spinner("Fetching all contests", spinner_type="dots")
-    def fetch_all_contests(self, limit: int = 100) -> Dict[str, List[Dict[str, Any]]]:
-        print(f"Fetching all contests with limit: {limit}")
+    def fetch_all_contests(self) -> Dict[str, List[Dict[str, Any]]]:
+        logger.info("Fetching all contests")
         all_contests = {}
         for sport in self.SUPPORTED_SPORTS:
-            print(f"Fetching contests for sport: {sport}")
-            all_contests[sport] = self.fetch_contests(sport, limit)
-            print(f"Fetched {len(all_contests[sport])} contests for {sport}")
-        print(f"Finished fetching all contests. Total sports: {len(all_contests)}")
+            logger.info(f"Fetching contests for sport: {sport}")
+            all_contests[sport] = self.fetch_contests(sport)
+            logger.info(f"Fetched {len(all_contests[sport])} contests for {sport}")
+        logger.info(f"Finished fetching all contests. Total sports: {len(all_contests)}")
         return all_contests
 
     @with_spinner("Fetching contest details", spinner_type="dots")
