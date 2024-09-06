@@ -14,7 +14,7 @@
 </head>
 <body>
     <h1>DraftKings Contest Finder Agent - User Stories for Sprint 3</h1>
-    <p>Sprint 3 focuses on implementing the notification system, scheduling tasks, and integrating all components of the DraftKings Contest Finder Agent.</p>
+    <p>Sprint 3 focuses on implementing the notification system, scheduling tasks, integrating all components of the DraftKings Contest Finder Agent, updating the HTML parsing method, and finalizing the project.</p>
 
     <div class="user-story">
         <h3>US-3.1: Implement Slack Notification System</h3>
@@ -148,8 +148,82 @@
         </div>
     </div>
 
+    <div class="user-story">
+        <h3>US-3.5: Update HTML Parsing to Use Beautiful Soup</h3>
+        <p><strong>As a</strong> developer,<br>
+        <strong>I want to</strong> update the Data Fetcher component to use Beautiful Soup for HTML parsing instead of AgentQL,<br>
+        <strong>So that</strong> the agent can more effectively extract contest information from DraftKings webpages.</p>
+        
+        <h4>Acceptance Criteria:</h4>
+        <ul>
+            <li>The Data Fetcher uses Beautiful Soup to parse HTML content from DraftKings contest pages</li>
+            <li>All previously extracted information (contest details, participant info, experience levels) is still correctly retrieved</li>
+            <li>The parsing process is efficient and handles different page structures or variations</li>
+            <li>Error handling is in place for unexpected HTML structures or content</li>
+            <li>Unit tests are updated or created to verify the correct functioning of the new parsing method</li>
+        </ul>
+        
+        <h4>Tasks:</h4>
+        <div class="task">
+            <strong>T-3.5.1:</strong> Install Beautiful Soup library and add it to the project dependencies
+        </div>
+        <div class="task">
+            <strong>T-3.5.2:</strong> Refactor the HTML parsing functions in the Data Fetcher to use Beautiful Soup
+        </div>
+        <div class="task">
+            <strong>T-3.5.3:</strong> Implement parsing logic for extracting contest details (e.g., entry fee, total prizes, current entries)
+        </div>
+        <div class="task">
+            <strong>T-3.5.4:</strong> Implement parsing logic for extracting participant information and experience levels
+        </div>
+        <div class="task">
+            <strong>T-3.5.5:</strong> Add error handling for cases where expected HTML elements are not found
+        </div>
+        <div class="task">
+            <strong>T-3.5.6:</strong> Update existing unit tests and create new ones to cover Beautiful Soup parsing
+        </div>
+        <div class="task">
+            <strong>T-3.5.7:</strong> Perform integration testing to ensure the updated Data Fetcher works correctly with other components
+        </div>
+    </div>
+
+    <div class="user-story">
+        <h3>US-3.6: Optimize Performance of HTML Parsing</h3>
+        <p><strong>As a</strong> developer,<br>
+        <strong>I want to</strong> optimize the performance of the HTML parsing process using Beautiful Soup,<br>
+        <strong>So that</strong> the agent can efficiently process large numbers of contest pages within the 5-minute schedule.</p>
+        
+        <h4>Acceptance Criteria:</h4>
+        <ul>
+            <li>The HTML parsing process completes within a reasonable time frame for typical contest pages</li>
+            <li>Memory usage is optimized to handle parsing of multiple pages in succession</li>
+            <li>The system can parse and process all relevant contests within the 5-minute scheduled run time</li>
+            <li>Performance metrics are logged for monitoring and future optimization</li>
+        </ul>
+        
+        <h4>Tasks:</h4>
+        <div class="task">
+            <strong>T-3.6.1:</strong> Profile the current HTML parsing process to identify performance bottlenecks
+        </div>
+        <div class="task">
+            <strong>T-3.6.2:</strong> Implement optimizations in Beautiful Soup usage (e.g., using appropriate parsers, CSS selectors)
+        </div>
+        <div class="task">
+            <strong>T-3.6.3:</strong> Implement parallel processing for parsing multiple contest pages if necessary
+        </div>
+        <div class="task">
+            <strong>T-3.6.4:</strong> Add performance logging to track parsing times and memory usage
+        </div>
+        <div class="task">
+            <strong>T-3.6.5:</strong> Conduct performance testing with a large number of contest pages
+        </div>
+        <div class="task">
+            <strong>T-3.6.6:</strong> Update the main application flow to accommodate any changes in the parsing process
+        </div>
+    </div>
+
     <p>
-        These user stories and tasks cover the main objectives for Sprint 3, focusing on the notification system, task scheduling, component integration, and configuration management. The development team should prioritize these items and may adjust the tasks as needed based on project progress and any unforeseen challenges.
+        These user stories and tasks cover the main objectives for Sprint 3, focusing on implementing the notification system, scheduling tasks, integrating all components, updating the HTML parsing method to use Beautiful Soup, and optimizing performance. The development team should prioritize these items and may adjust the tasks as needed based on project progress and any unforeseen challenges.
     </p>
 </body>
 </html>
