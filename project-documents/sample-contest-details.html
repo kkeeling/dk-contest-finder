@@ -1,0 +1,289 @@
+
+
+<style type="text/css">
+  .dk-spinner.loading-rules {
+      position: absolute;
+      top: 234px;
+      left: 380px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-left: 4px solid #fff;
+  }
+  .rm-prize-plus{
+      padding-left: 3px;
+  }
+  .rm-prize-icon{
+      line-height: 17px; 
+      cursor: pointer; 
+      position: relative;
+  }
+  .rm-prize-quantity{
+      display:none; 
+      position: absolute; 
+      background-color: #000000; 
+      top: -20px; 
+      left: 0px; 
+      padding: 2px 4px;
+      opacity: 1;
+      white-space: nowrap;
+  }
+</style>
+<script>
+  window.mvcVars = window.mvcVars || {};
+  window.mvcVars.showReignmakersMerchInDFS = false;
+  function showTooltip(element) {
+      var tooltip = element.querySelector('.tooltip.rm-prize-quantity');
+      tooltip.style.display = 'block';
+  }
+
+  function hideTooltip(element) {
+      var tooltip = element.querySelector('.tooltip.rm-prize-quantity');
+      tooltip.style.display = 'none';
+  }
+</script>
+<div id="contest-details-pop"
+  class="dk-drk-thm"
+  data-contest-name="NFL $1 Double Up"
+  data-contest-img="/_assets/images/icons/contest-types/50-50.png"
+  data-contest-id="164121041"
+  data-draft-start-time="9/8/2024 5:00:00 PM"
+  data-contest-sport="NFL"
+  tabIndex="0"
+  role="dialog"
+  aria-labelledby="dialog1Title"
+>
+  <div class="header">
+      <div class="pull-left contest-info">
+              <div class="contest-logo">
+                  <img src="/_assets/images/icons/contest-types/50-50.png" alt="Contest Logo" />
+              </div>
+          <h2 data-test-id="contest-name" id="dialog1Title" title="NFL $1 Double Up">NFL $1 Double Up</h2>
+          <div class="well dk-well dk-well-inline dk-well-xs">
+              <label class="dk-gold">Entries:</label>
+              <p><span class="contest-entries">7</span>/<span data-test-id="contest-seats">11</span></p>
+          </div>
+          <div class="well dk-well dk-well-inline dk-well-xs">
+              <label class="dk-gold">Entry:</label>
+              <p data-test-id="contest-entry-fee">$1</p>
+          </div>
+          <div class="well dk-well dk-well-inline dk-well-xs">
+              <label class="dk-gold">Prizes:</label>
+                  <p data-test-id="contest-total-prizes">$10</p>
+          </div>
+          <div class="well dk-well dk-well-inline dk-well-xs">
+              <label class="dk-gold">Crowns:</label>
+              <p data-test-id="contest-fpps">1</p>
+          </div>
+      </div>
+          <div class="pull-left user-info">
+              <p>
+                  <span>Balance:</span> <span class="account-balance">
+$3,909.04                    </span>
+              </p>
+              <p><span>My Entries:</span> <span class="dk-gold current-entries">0</span></p>
+              <p style="display:none">
+                  <span style="width: auto;">Free w/ Tickets:</span> <span class="dk-gold available-tickets">0</span>
+              </p>
+              <p>
+                      <span data-test-id="contest-multi-entry">No Multi-Entry</span>
+                  
+              </p>
+          </div>
+                  <div class="pull-right">
+              <div class="well dk-well dk-well-xs countdown">
+                  <label>Live In:</label>
+                  <p class="cntr dk-gold" data-start="1725814800000">--:--:--</p>
+                  <div class="full-date">
+                      <p class="text-muted">
+                          <small>09/08 1:00 PM EST</small>
+                      </p>
+                  </div>
+              </div>
+          </div>
+  </div>
+  <div class="clearfix"></div>
+  <ul class="nav nav-tabs dk-tabs-orange" role="tablist">
+      <li role="none" class="active">
+          <a data-toggle="tab" href="#details-wrap" id="modal-details-tab" role="tab" aria-controls="details-wrap" tabindex="0" aria-selected="true" >Contest Details</a>
+      </li>
+          <li role="none"><a data-toggle="tab" id="modal-rules-tab" aria-controls="rules-and-scoring-wrap" href="#rules-and-scoring-wrap" role="tab" tabindex="-1" aria-selected="false">Rules & Scoring</a></li>
+  </ul>
+  <div class="tab-content">
+      <div id="details-wrap" aria-labelledby="modal-details-tab" tabindex="0" class="tab-pane active">
+
+<style type="text/css">
+  .resizable-summary {
+      font-weight: 600;
+  }
+  .resizable-summary a {
+      color: #00b1c4;
+      font-weight: 600;
+  }
+  .rm-prize-plus{
+      padding: 0 2px;
+  }
+</style>
+<div class="rounded-panel">
+  <div class="left">
+      <div class="dk-black-rounded-panel summary">
+          <label>Summary</label>
+              <div class="panel-body">
+                  This 11-player contest features $10.00 in total prizes and pays out the top 5 finishing positions. First place wins $2.00.
+                  <br /><br />
+
+              </div>
+      </div>
+      <div class="dk-black-rounded-panel entrants-list">
+          <label>Entrants</label>
+          <div class="input-group search-bar">
+              <input type="text" class="form-control input-sm" id="search-input" aria-label="Search Entrants" placeholder="Search for an entrant...">
+              <span class="input-group-addon"><i class="icon-search"></i></span>
+          </div>
+          <div class="panel-body">
+                  <div id="entrants-layer">
+                      <table id="entrants-table" class="dk-grid entrants-table">
+                          <tbody>
+
+      <tr>
+      <td data-un="nwarra"><span title="nwarra" class="entrant-username">nwarra</span> <span title="Experience Badge" class="icon-experienced-user-5"></span></td>
+      <td data-un="pimaforsure"><span title="PIMAFORSURE" class="entrant-username">PIMAFORSURE</span> <span title="Experience Badge" class="icon-experienced-user-5"></span></td>
+      <td data-un="hawkins810"><span title="Hawkins810" class="entrant-username">Hawkins810</span> <span title="Experience Badge" class="icon-experienced-user-2"></span></td>
+      </tr><tr>
+      <td data-un="indermillba"><span title="indermillba" class="entrant-username">indermillba</span> <span title="Experience Badge" class="icon-experienced-user-1"></span></td>
+      <td data-un="meandean5"><span title="meandean5" class="entrant-username">meandean5</span> <span title="Experience Badge" class="icon-experienced-user-5"></span></td>
+      <td data-un="niudave85"><span title="NIUDave85" class="entrant-username">NIUDave85</span> <span title="Experience Badge" class="icon-experienced-user-5"></span></td>
+      </tr><tr>
+      <td data-un="dublinking"><span title="dublinking" class="entrant-username">dublinking</span> <span title="Experience Badge" class="icon-experienced-user-5"></span></td>
+
+  <td data-un="" class="empty-user">&nbsp;</td>
+  <td data-un="" class="empty-user">&nbsp;</td>
+  </tr>
+
+                          </tbody>
+                      </table>
+                  </div>
+                  <table id="entrants-search" class="dk-grid" style="display: none;">
+                      <tbody></tbody>
+                  </table>
+          </div>
+      </div>
+  </div>
+  <div class="dk-black-rounded-panel prize-payouts">
+      <label>Prize Payouts</label>
+      <div class="panel-body">
+                  <table class="dk-grid" tabindex="0">
+                      <tr class="accessible-hidden-header">
+                          <th>Position Count</th>
+                          <th>Description</th>
+                      </tr>
+                          <tr>
+                              <td>1st - 5th</td>
+                              <td>$2.00</td>
+                          </tr>
+                  </table>
+      </div>
+  </div>
+</div>
+<div class="clearfix"></div>
+<div class="footer">
+  <div class="footer-links">
+      <div class="HEP-info">
+          <span class="icon-experienced-user"></span>
+          <span><a href="/experience-badges" target="_blank">Experience Badge</a></span>
+      </div>
+      <div class="AvgRes-info">
+          <span class="icon-average-results"></span>
+          <span><a href="/average-results" target="_blank">Average Results</a></span>
+      </div>
+      <div class="ResGam-info">
+          <span class="icon-shield"></span>
+          <span><a href="/responsible-gaming" target="_blank">Responsible Gaming</a></span>
+      </div>
+  </div>
+  <div class="footer-buttons">
+          <a href="/contest/draftteam/164121041" class="btn dk-btn-gold" id="contest-details-enter">Draft Team</a>
+      <a href="#" class="btn dk-btn-lgt-grey" onclick="$.fancybox.close();return false;">Close</a>
+  </div>
+</div>
+<script type="text/javascript">
+  $('a#contest-details-enter').on('click', function (e) {
+      e.preventDefault();
+      var link = $(this).attr('href');
+
+      if (window.DK && window.DK.Lobby && window.DK.Lobby.trackLobbyEvent) {
+          var contestId = null;
+          var contestDetailsOptions = {};
+          if (window.DK.ContestDetailsPop) {
+              contestDetailsOptions = window.DK.ContestDetailsPop.getOptions();
+              contestId = contestDetailsOptions.contestId;
+          }
+          
+          if (window.DK.Lobby.trackGameStyleEvent) {
+              var draftGroupId = contestDetailsOptions.draftGroupId;
+              var contestId = contestDetailsOptions.contestId;
+              var sport = contestDetailsOptions.sport;
+              window.DK.Lobby.trackGameStyleEvent('click_modal_draft_team', draftGroupId, contestId, sport);
+          }
+
+          window.DK.Lobby.trackLobbyEvent("Contests Filtered", {
+              "Contest Entry": "Contest Details",
+              "contestId": contestId
+          },
+          function () {
+              window.location.href = link;
+          });
+      } else {
+          window.location.href = link;
+      }
+  });
+</script>
+      </div>
+          <div id="rules-and-scoring-wrap" aria-labelledby="modal-rules-tab" tabindex="0" class="tab-pane">
+              <div id="dkjs-rules-and-scoring-container" class="legacy" style="padding-bottom: 10px">
+                  <div class="dk-spinner loading-rules"></div>
+              </div>
+              <div class="footer">
+                  <div class="footer-links">
+                      <div class="HEP-info">
+                          <span class="icon-experienced-user"></span>
+                          <span><a href="/experience-badges" target="_blank">Experience Badge</a></span>
+                      </div>
+                      <div class="AvgRes-info">
+                          <span class="icon-average-results"></span>
+                          <span><a href="/average-results" target="_blank">Average Results</a></span>
+                      </div>
+                      <div class="ResGam-info">
+                          <span class="icon-shield"></span>
+                          <span><a href="/responsible-gaming" target="_blank">Responsible Gaming</a></span>
+                      </div>
+                  </div>
+                  <div class="footer-buttons">
+                          <a href="/contest/draftteam/164121041" class="btn dk-btn-gold">Draft Team</a>
+                      <a href="#" class="btn dk-btn-lgt-grey" tabindex="0" onclick="$.fancybox.close();return false;">Close</a>
+                  </div>
+              </div>
+          </div>
+  </div>
+</div>
+<script type="text/javascript">
+
+  $(window).off('dkContestDetailsPop.renderComplete').on('dkContestDetailsPop.renderComplete', function () {
+      var pop = DK.ContestDetailsPop.init({
+          currentEntries: 7,
+          maxEntries: 11,
+          userEntries: 0,
+          maxUserEntries: 1,
+          userBalance: 3909.040000000,
+          redeemableTickets: 0,
+          contestId: 164121041,
+          contestStatusId: 1,
+          contestTicketOnlyEntry: false,
+          contestCost: 1.0000,
+          maxEntriesPerRequest: 300
+          });
+      DK.ContestDetailsPop.Paging.init(pop, 99);
+      DK.ContestDetailsPop.Search.init(pop, 99);
+      window.pixel.fireContestPop(164121041, 'NFL', 1.0000);
+      $('#contest-details-pop').focus();
+      $(window).trigger('dkjs-dkContestDetailsPop.renderComplete', {contestId: 164121041, draftGroupId: 0});
+  });
+</script>
