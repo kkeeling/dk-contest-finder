@@ -7,7 +7,8 @@ from .utils import with_spinner
 
 load_dotenv('.env.local')
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+logging.disable(logging.CRITICAL)
 logger = logging.getLogger(__name__)
 
 class DatabaseManager:
