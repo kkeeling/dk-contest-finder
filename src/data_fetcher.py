@@ -3,7 +3,12 @@ import random
 from typing import List, Dict, Any
 import requests
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from .utils import with_spinner
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 print("DataFetcher module imported")
 
@@ -13,12 +18,14 @@ class DataFetcher:
     CONTEST_DETAILS_URL = f"{BASE_URL}/contest/detailspop?contestId={{}}"
     SUPPORTED_SPORTS = ["NFL"]
     
-    def __init__(self, min_delay: float = 1.0, max_delay: float = 3.0):
-        print(f"Initializing DataFetcher with min_delay={min_delay}, max_delay={max_delay}")
+    def __init__(self, min_delay: float = 1.0, max_delay: float = 3.0, max_workers: int = 5):
+        logger.info(f"Initializing DataFetcher with min_delay={min_delay}, max_delay={max_delay}, max_workers={max_workers}")
         self.min_delay = min_delay
         self.max_delay = max_delay
         self.last_request_time = 0
-        print("DataFetcher initialized")
+        self.max_workers = max_workers
+        self.session = requests.Session()
+        logger.info("DataFetcher initialized")
 
     def _construct_url(self, sport: str) -> str:
         return f"{self.LOBBY_URL}?sport={sport}"
@@ -75,24 +82,40 @@ class DataFetcher:
 
     @with_spinner("Fetching contest details", spinner_type="dots")
     def fetch_contest_details(self, contest_id: str) -> Dict[str, Any]:
-        print(f"Fetching contest details for contest_id: {contest_id}")
+        logger.info(f"Fetching contest details for contest_id: {contest_id}")
         url = self.CONTEST_DETAILS_URL.format(contest_id)
-        print(f"Contest details URL: {url}")
+        logger.debug(f"Contest details URL: {url}")
         
         self._wait_between_requests()
 
         try:
-            print(f"Sending GET request to {url}")
-            response = requests.get(url)
+            logger.debug(f"Sending GET request to {url}")
+            response = self.session.get(url)
             response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.text, 'lxml')
             
             contest_data = self._parse_contest_details(soup)
-            print("Contest details parsed successfully")
+            logger.info("Contest details parsed successfully")
             return contest_data
         except requests.RequestException as e:
-            print(f"Error fetching contest details: {e}")
+            logger.error(f"Error fetching contest details: {e}")
             return {}
+
+    @with_spinner("Fetching multiple contest details", spinner_type="dots")
+    def fetch_multiple_contest_details(self, contest_ids: List[str]) -> List[Dict[str, Any]]:
+        logger.info(f"Fetching details for {len(contest_ids)} contests")
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            future_to_id = {executor.submit(self.fetch_contest_details, contest_id): contest_id for contest_id in contest_ids}
+            results = []
+            for future in as_completed(future_to_id):
+                contest_id = future_to_id[future]
+                try:
+                    data = future.result()
+                    results.append(data)
+                except Exception as exc:
+                    logger.error(f'{contest_id} generated an exception: {exc}')
+        logger.info(f"Fetched details for {len(results)} contests")
+        return results
 
     def _parse_contest_details(self, soup: BeautifulSoup) -> Dict[str, Any]:
         contest_info = self._extract_contest_info(soup)
@@ -111,29 +134,27 @@ class DataFetcher:
 
     def _extract_contest_info(self, soup: BeautifulSoup) -> Dict[str, str]:
         return {
-            'name': soup.find('h2', {'data-test-id': 'contest-name'}).text.strip(),
-            'entries': soup.find('span', class_='contest-entries').text.strip(),
-            'max_entries': soup.find('span', {'data-test-id': 'contest-seats'}).text.strip(),
-            'entry_fee': soup.find('p', {'data-test-id': 'contest-entry-fee'}).text.strip(),
-            'total_prizes': soup.find('p', {'data-test-id': 'contest-total-prizes'}).text.strip(),
+            'name': soup.select_one('h2[data-test-id="contest-name"]').text.strip(),
+            'entries': soup.select_one('span.contest-entries').text.strip(),
+            'max_entries': soup.select_one('span[data-test-id="contest-seats"]').text.strip(),
+            'entry_fee': soup.select_one('p[data-test-id="contest-entry-fee"]').text.strip(),
+            'total_prizes': soup.select_one('p[data-test-id="contest-total-prizes"]').text.strip(),
         }
 
     def _extract_participants(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
         participants = []
-        entrants_table = soup.find('table', id='entrants-table')
+        entrants_table = soup.select_one('table#entrants-table')
         
         if entrants_table:
-            for row in entrants_table.find_all('tr'):
-                for cell in row.find_all('td'):
-                    if 'empty-user' not in cell.get('class', []):
-                        username = cell.find('span', class_='entrant-username').text.strip()
-                        experience_icon = cell.find('span', class_=lambda x: x and x.startswith('icon-experienced-user-'))
-                        experience_level = self._map_experience_level(experience_icon['class'][0].split('-')[-1] if experience_icon else '0')
-                        
-                        participants.append({
-                            'username': username,
-                            'experience_level': experience_level
-                        })
+            for cell in entrants_table.select('td:not(.empty-user)'):
+                username = cell.select_one('span.entrant-username').text.strip()
+                experience_icon = cell.select_one('span[class^="icon-experienced-user-"]')
+                experience_level = self._map_experience_level(experience_icon['class'][0].split('-')[-1] if experience_icon else '0')
+                
+                participants.append({
+                    'username': username,
+                    'experience_level': experience_level
+                })
         
         return participants
 
