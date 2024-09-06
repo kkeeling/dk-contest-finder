@@ -93,7 +93,7 @@ class DataProcessor:
                 contest.update(contest_details)
                 entrants = contest.pop('participants', [])
                 print(f"Number of entrants: {len(entrants)}")
-                
+
                 analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
                 print(f"Analysis result: {analysis_result}")
                 contest.update(analysis_result)
@@ -121,6 +121,7 @@ class DataProcessor:
             print(f"Processing contest: {contest.get('id', 'Unknown ID')}")
             entrants = self.db_manager.get_contest_entrants(contest['id'])
             print(f"Number of entrants: {len(entrants)}")
+            print(f"Entrants: {entrants}")
             analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
             print(f"Analysis result: {analysis_result}")
             contest.update(analysis_result)
