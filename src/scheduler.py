@@ -23,7 +23,7 @@ class Scheduler:
     @with_spinner("Running contest finder", spinner_type="dots")
     def run_contest_finder(self):
         logger.info("Starting contest finder process")
-        contests = self.data_fetcher.fetch_all_contests(limit=50)
+        contests = self.data_fetcher.fetch_all_contests()
         self.data_processor.process_contests(contests)
         eligible_contests = self.data_processor.process_unprocessed_contests()
         for contest in eligible_contests:
