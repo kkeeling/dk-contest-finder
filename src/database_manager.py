@@ -72,7 +72,7 @@ class DatabaseManager:
             logger.error(f"Error retrieving entrants for contest {contest_id}: {str(e)}")
             raise
 
-    @with_spinner("Inserting contest", spinner_type="dots")
+    @with_spinner("Inserting or updating contest", spinner_type="dots")
     def insert_contest(self, contest: Dict[str, Any]) -> None:
         try:
             processed_contest = {
@@ -85,10 +85,20 @@ class DatabaseManager:
                 'status': contest.get('status', 'unprocessed'),
                 'highest_experience_ratio': contest.get('highest_experience_ratio'),
             }
-            self.supabase.table('contests').insert(processed_contest).execute()
-            logger.info(f"Successfully inserted contest {contest['id']}")
+            
+            # Check if the contest already exists
+            existing_contest = self.supabase.table('contests').select('id').eq('id', contest['id']).execute()
+            
+            if existing_contest.data:
+                # Update existing contest
+                self.supabase.table('contests').update(processed_contest).eq('id', contest['id']).execute()
+                logger.info(f"Successfully updated contest {contest['id']}")
+            else:
+                # Insert new contest
+                self.supabase.table('contests').insert(processed_contest).execute()
+                logger.info(f"Successfully inserted contest {contest['id']}")
         except Exception as e:
-            logger.error(f"Error inserting contest {contest['id']}: {str(e)}")
+            logger.error(f"Error inserting or updating contest {contest['id']}: {str(e)}")
             raise
 
     @with_spinner("Inserting contests", spinner_type="dots")
