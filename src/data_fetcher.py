@@ -2,9 +2,7 @@ import time
 import random
 from typing import List, Dict, Any
 import requests
-from playwright.sync_api import sync_playwright
-from playwright_dompath.dompath_sync import xpath_path
-import agentql
+from bs4 import BeautifulSoup
 from .utils import with_spinner
 
 print("DataFetcher module imported")
@@ -83,69 +81,72 @@ class DataFetcher:
         
         self._wait_between_requests()
 
-        with sync_playwright() as p:
-            print("Launching Playwright browser")
-            browser = p.chromium.launch(headless=True)
-            page = agentql.wrap(browser.new_page())
+        try:
+            print(f"Sending GET request to {url}")
+            response = requests.get(url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
             
-            try:
-                print(f"Navigating to URL: {url}")
-                page.goto(url)
-                QUERY = """
-                    {
-                        contest_info {
-                            title
-                            entry_fee
-                            total_prizes
-                        }
-                        num_entries
-                        total_entries
-                        entrants_list(all attributes)[] {
-                            entrant_username
-                            icon
-                        }
-                    }                
-                """
+            contest_data = self._parse_contest_details(soup)
+            print("Contest details parsed successfully")
+            return contest_data
+        except requests.RequestException as e:
+            print(f"Error fetching contest details: {e}")
+            return {}
 
-                print("Executing AgentQL query")
-                contest_data = page.query_data(QUERY)
-                print("AgentQL query executed successfully")
-                
-                processed_data = {
-                    'title': contest_data.get('contest_info', {}).get('title', ''),
-                    'entry_fee': contest_data.get('contest_info', {}).get('entry_fee', 0),
-                    'total_prizes': contest_data.get('contest_info', {}).get('total_prizes', 0),
-                    'entries': {
-                        'current': contest_data.get('num_entries', 0),
-                        'maximum': contest_data.get('total_entries', 0)
-                    },
-                    'participants': []
-                }
+    def _parse_contest_details(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        contest_info = self._extract_contest_info(soup)
+        participants = self._extract_participants(soup)
+        
+        return {
+            'title': contest_info.get('name', ''),
+            'entry_fee': self._parse_currency(contest_info.get('entry_fee', '0')),
+            'total_prizes': self._parse_currency(contest_info.get('total_prizes', '0')),
+            'entries': {
+                'current': int(contest_info.get('entries', '0')),
+                'maximum': int(contest_info.get('max_entries', '0'))
+            },
+            'participants': participants
+        }
 
-                # Process participant data
-                participants = contest_data.get('entrants_list', [])
-                print(f"Processing {len(participants)} participants")
-                for participant in participants:
-                    experience_level = self._map_experience_level(participant.get('experience_level', ''))
-                    processed_data['participants'].append({
-                        'username': participant.get('entrant_username', ''),
-                        'experience_level': experience_level
-                    })
+    def _extract_contest_info(self, soup: BeautifulSoup) -> Dict[str, str]:
+        return {
+            'name': soup.find('h2', {'data-test-id': 'contest-name'}).text.strip(),
+            'entries': soup.find('span', class_='contest-entries').text.strip(),
+            'max_entries': soup.find('span', {'data-test-id': 'contest-seats'}).text.strip(),
+            'entry_fee': soup.find('p', {'data-test-id': 'contest-entry-fee'}).text.strip(),
+            'total_prizes': soup.find('p', {'data-test-id': 'contest-total-prizes'}).text.strip(),
+        }
 
-                print("Contest details processed successfully")
-                return processed_data
-            except Exception as e:
-                print(f"Error fetching contest details: {e}")
-                return {}
-            finally:
-                print("Closing Playwright browser")
-                browser.close()
+    def _extract_participants(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        participants = []
+        entrants_table = soup.find('table', id='entrants-table')
+        
+        if entrants_table:
+            for row in entrants_table.find_all('tr'):
+                for cell in row.find_all('td'):
+                    if 'empty-user' not in cell.get('class', []):
+                        username = cell.find('span', class_='entrant-username').text.strip()
+                        experience_icon = cell.find('span', class_=lambda x: x and x.startswith('icon-experienced-user-'))
+                        experience_level = self._map_experience_level(experience_icon['class'][0].split('-')[-1] if experience_icon else '0')
+                        
+                        participants.append({
+                            'username': username,
+                            'experience_level': experience_level
+                        })
+        
+        return participants
+
+    def _parse_currency(self, value: str) -> float:
+        return float(value.replace('$', '').replace(',', ''))
 
     def _map_experience_level(self, level: str) -> int:
         level_map = {
-            'beginner': 0,
-            'low': 1,
-            'medium': 2,
-            'high': 3
+            '0': 0,
+            '1': 1,
+            '2': 2,
+            '3': 3,
+            '4': 3,
+            '5': 3
         }
-        return level_map.get(level.lower(), 0)
+        return level_map.get(level, 0)
