@@ -7,3 +7,4 @@ requests
 typing-extensions
 halo
 beautifulsoup4
+lxml
