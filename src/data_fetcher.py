@@ -95,10 +95,16 @@ class DataFetcher:
             soup = BeautifulSoup(response.text, 'lxml')
             
             contest_data = self._parse_contest_details(soup)
+            if not contest_data:
+                logger.error("Failed to parse contest details")
+                return {}
             logger.info("Contest details parsed successfully")
             return contest_data
         except requests.RequestException as e:
             logger.error(f"Error fetching contest details: {e}")
+            return {}
+        except Exception as e:
+            logger.error(f"Unexpected error in fetch_contest_details: {e}")
             return {}
 
     @with_spinner("Fetching multiple contest details", spinner_type="dots")
@@ -118,19 +124,27 @@ class DataFetcher:
         return results
 
     def _parse_contest_details(self, soup: BeautifulSoup) -> Dict[str, Any]:
-        contest_info = self._extract_contest_info(soup)
-        participants = self._extract_participants(soup)
-        
-        return {
-            'title': contest_info.get('name', ''),
-            'entry_fee': self._parse_currency(contest_info.get('entry_fee', '0')),
-            'total_prizes': self._parse_currency(contest_info.get('total_prizes', '0')),
-            'entries': {
-                'current': int(contest_info.get('entries', '0')),
-                'maximum': int(contest_info.get('max_entries', '0'))
-            },
-            'participants': participants
-        }
+        try:
+            contest_info = self._extract_contest_info(soup)
+            participants = self._extract_participants(soup)
+            
+            if not contest_info or not participants:
+                logger.error("Failed to extract contest info or participants")
+                return {}
+            
+            return {
+                'title': contest_info.get('name', ''),
+                'entry_fee': self._parse_currency(contest_info.get('entry_fee', '0')),
+                'total_prizes': self._parse_currency(contest_info.get('total_prizes', '0')),
+                'entries': {
+                    'current': int(contest_info.get('entries', '0')),
+                    'maximum': int(contest_info.get('max_entries', '0'))
+                },
+                'participants': participants
+            }
+        except Exception as e:
+            logger.error(f"Error in _parse_contest_details: {e}")
+            return {}
 
     def _extract_contest_info(self, soup: BeautifulSoup) -> Dict[str, str]:
         return {
