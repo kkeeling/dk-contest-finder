@@ -39,6 +39,7 @@ class ContestFilter:
                 and "beginner" not in contest.get('n', '').lower()
                 and "satellite" not in contest.get('n', '').lower()
                 and "madden" not in contest.get('n', '').lower()
+                and "primetime" not in contest.get('n', '').lower()
                 and float(contest.get('a', 0)) <= max_entry_fee
                 and (contest.get('gameType') == 'Classic' or 
                      (contest.get('gameType') == 'Showdown Captain Mode' and 
