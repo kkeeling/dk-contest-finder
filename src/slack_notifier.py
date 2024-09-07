@@ -12,9 +12,10 @@ logger = logging.getLogger(__name__)
 load_dotenv('.env.local')
 
 class SlackNotifier:
-    def __init__(self, token=None, client=None):
+    def __init__(self, token=None, client=None, channel=None):
         self.token = token or os.getenv("SLACK_BOT_TOKEN") or "test_token"
         self.client = client or WebClient(token=self.token)
+        self.channel = channel or os.getenv("SLACK_CHANNEL") or "__dk_contests"
 
     def notify_contest(self, contest: Dict[str, Any]) -> None:
         message = self._format_contest_message(contest)
@@ -30,7 +31,6 @@ class SlackNotifier:
             f"Highest Experience Ratio: {contest['highest_experience_ratio']:.2%}\n"
             f"Contest Link: https://www.draftkings.com/contest/draftteam/{contest['id']}"
         )
-        self.channel = "__dk_contests"
 
     def send_notification(self, message, max_retries=3):
         for attempt in range(max_retries):
