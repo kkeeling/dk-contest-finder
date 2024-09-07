@@ -83,6 +83,10 @@ class DataProcessor:
     def __init__(self, data_fetcher):
         self.db_manager = DatabaseManager()
         self.data_fetcher = data_fetcher
+        self.blacklisted_usernames = set(["user1", "user2", "user3"])  # Add your blacklisted usernames here
+
+    def has_blacklisted_user(self, entrants: List[Dict[str, Any]]) -> bool:
+        return any(entrant['username'] in self.blacklisted_usernames for entrant in entrants)
 
     @with_spinner("\nProcessing contests", spinner_type="dots")
     def process_contests(self, contests: Dict[str, List[Dict[str, Any]]]) -> None:
@@ -99,10 +103,14 @@ class DataProcessor:
                 contest.update(contest_details)
                 entrants = contest.pop('participants', [])
 
-                analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
-                contest.update(analysis_result)
-
-                contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.8 else 'processed'
+                # Check for blacklisted usernames
+                if self.has_blacklisted_user(entrants):
+                    contest['highest_experience_ratio'] = 1.0
+                    contest['status'] = 'processed'
+                else:
+                    analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
+                    contest.update(analysis_result)
+                    contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.8 else 'processed'
 
                 self.db_manager.insert_contest(contest)
 
@@ -114,9 +122,13 @@ class DataProcessor:
         unprocessed_contests = self.db_manager.get_unprocessed_contests()
         for contest in unprocessed_contests:
             entrants = self.db_manager.get_contest_entrants(contest['id'])
-            analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
-            contest.update(analysis_result)
-
-            contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.8 else 'processed'
+            
+            if self.has_blacklisted_user(entrants):
+                contest['highest_experience_ratio'] = 1.0
+                contest['status'] = 'processed'
+            else:
+                analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
+                contest.update(analysis_result)
+                contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.8 else 'processed'
 
             self.db_manager.update_contest_status(contest['id'], contest['status'])

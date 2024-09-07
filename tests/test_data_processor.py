@@ -119,5 +119,21 @@ class TestDataProcessor(unittest.TestCase):
         mock_get_entrants.assert_called_once_with(2)
         mock_update_status.assert_called_once_with(2, 'ready_to_enter')
 
+    def test_blacklisted_user(self):
+        self.data_processor.blacklisted_usernames = {"blacklisted_user"}
+        contest = {
+            "id": 1,
+            "title": "Test Contest",
+            "entries": {"current": 5, "maximum": 10},
+            "participants": [
+                {"username": "regular_user", "experience_level": 1},
+                {"username": "blacklisted_user", "experience_level": 2},
+            ]
+        }
+        self.data_processor.process_contests({"TEST": [contest]})
+        processed_contest = self.db_manager.get_contest(1)
+        self.assertEqual(processed_contest['status'], 'processed')
+        self.assertEqual(processed_contest['highest_experience_ratio'], 1.0)
+
 if __name__ == '__main__':
     unittest.main()
