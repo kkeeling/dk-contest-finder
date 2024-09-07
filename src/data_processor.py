@@ -90,7 +90,7 @@ class DataProcessor:
         self.blacklisted_usernames = set(["lakergreat2", "theleafnode", "glamrock"])  # Add your blacklisted usernames here
 
     def has_blacklisted_user(self, entrants: List[Dict[str, Any]]) -> bool:
-        return any(entrant['username'] in self.blacklisted_usernames for entrant in entrants)
+        return any(entrant['username'].lower() in self.blacklisted_usernames for entrant in entrants)
 
     @with_spinner("\nProcessing contests", spinner_type="dots")
     def process_contests(self, contests: Dict[str, List[Dict[str, Any]]]) -> None:
