@@ -25,8 +25,13 @@ class ContestFilter:
         
         filtered_contests = {}
         for sport in contests.keys():
-            filtered_ids = filtered_by_entrants.get(sport, set()) #.union(filtered_by_title.get(sport, set())).intersection(filtered_by_entry_fee.get(sport, set()))
-            filtered_contests[sport] = [contest for contest in contests[sport] if contest['id'] in filtered_ids]
+            filtered_ids = filtered_by_entrants.get(sport, set())
+            filtered_contests[sport] = [
+                contest for contest in contests[sport] 
+                if contest['id'] in filtered_ids 
+                and "casual" not in contest.get('n', '').lower() 
+                and "beginner" not in contest.get('n', '').lower()
+            ]
         
         return filtered_contests
 
