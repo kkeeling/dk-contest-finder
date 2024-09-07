@@ -18,6 +18,11 @@ class ContestFilter:
         return {sport: [contest for contest in sport_contests if contest.get('a', 0) <= max_entry_fee]
                 for sport, sport_contests in contests.items()}
 
+    @staticmethod
+    def filter_by_game_type(contests: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
+        return {sport: [contest for contest in sport_contests if contest.get('gameType') in ['Classic', 'Showdown Captain Mode']]
+                for sport, sport_contests in contests.items()}
+
     @classmethod
     def apply_filters(cls, contests: Dict[str, List[Dict[str, Any]]], max_entrants: int = 5, title_keyword: str = "Double Up", max_entry_fee: float = 50.0) -> Dict[str, List[Dict[str, Any]]]:
         filtered_by_entrants = {sport: set(contest['id'] for contest in sport_contests)
@@ -32,6 +37,7 @@ class ContestFilter:
                 and "casual" not in contest.get('n', '').lower() 
                 and "beginner" not in contest.get('n', '').lower()
                 and float(contest.get('a', 0)) <= max_entry_fee
+                and contest.get('gameType') in ['Classic', 'Showdown Captain Mode']
             ]
         
         return filtered_contests
