@@ -2,15 +2,18 @@ import unittest
 from unittest.mock import MagicMock, patch
 from src.data_processor import ContestFilter, DataProcessor, EntrantAnalyzer
 from src.database_manager import DatabaseManager
+from src.data_fetcher import DataFetcher
 
 class TestContestFilter(unittest.TestCase):
     def setUp(self):
-        self.contests = [
-            {"id": 1, "title": "NFL Double Up", "entries": {"current": 50, "maximum": 1000}},
-            {"id": 2, "title": "NFL 3-Player", "entries": {"current": 1, "maximum": 3}},
-            {"id": 3, "title": "NFL 5-Player", "entries": {"current": 2, "maximum": 5}},
-            {"id": 4, "title": "NFL Millionaire Maker", "entries": {"current": 10000, "maximum": 1000000}},
-        ]
+        self.contests = {
+            "NFL": [
+                {"id": 1, "n": "NFL Double Up", "m": 1000, "a": 10},
+                {"id": 2, "n": "NFL 3-Player", "m": 3, "a": 5},
+                {"id": 3, "n": "NFL 5-Player", "m": 5, "a": 20},
+                {"id": 4, "n": "NFL Millionaire Maker", "m": 1000000, "a": 100},
+            ]
+        }
 
     def test_filter_by_entrants(self):
         filtered = ContestFilter.filter_by_entrants(self.contests, 10)
