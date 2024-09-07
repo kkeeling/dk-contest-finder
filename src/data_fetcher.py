@@ -39,7 +39,7 @@ class DataFetcher:
         
         self.last_request_time = time.time()
 
-    @with_spinner("Fetching contests for sport", spinner_type="dots")
+    @with_spinner("\nFetching contests for sport", spinner_type="dots")
     def fetch_contests(self, sport: str) -> List[Dict[str, Any]]:
         if sport not in self.SUPPORTED_SPORTS:
             return []
@@ -60,7 +60,7 @@ class DataFetcher:
             logger.error(f"Unexpected error in fetch_contests: {e}", exc_info=True)
             return []
 
-    @with_spinner("Fetching all contests", spinner_type="dots")
+    @with_spinner("\nFetching all contests", spinner_type="dots")
     def fetch_all_contests(self) -> Dict[str, List[Dict[str, Any]]]:
         all_contests = {}
         for sport in self.SUPPORTED_SPORTS:
@@ -70,7 +70,7 @@ class DataFetcher:
                 logger.error(f"Error fetching contests for sport {sport}: {e}", exc_info=True)
         return all_contests
 
-    @with_spinner("Fetching contest details", spinner_type="dots")
+    @with_spinner("\nFetching contest details", spinner_type="dots")
     def fetch_contest_details(self, contest_id: str) -> Dict[str, Any]:
         url = self.CONTEST_DETAILS_URL.format(contest_id)
         self._wait_between_requests()
@@ -144,7 +144,7 @@ class DataFetcher:
             logger.error(f"Error extracting participants: {e}")
         return participants
 
-    @with_spinner("Fetching multiple contest details", spinner_type="dots")
+    @with_spinner("\nFetching multiple contest details", spinner_type="dots")
     def fetch_multiple_contest_details(self, contest_ids: List[str]) -> List[Dict[str, Any]]:
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             future_to_id = {executor.submit(self.fetch_contest_details, contest_id): contest_id for contest_id in contest_ids}

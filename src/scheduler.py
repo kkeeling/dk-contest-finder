@@ -24,9 +24,7 @@ class Scheduler:
         logger.info("Starting contest finder process")
         contests = self.data_fetcher.fetch_all_contests()
         self.data_processor.process_contests(contests)
-        eligible_contests = self.data_processor.process_unprocessed_contests()
-        for contest in eligible_contests:
-            self.slack_notifier.notify_contest(contest)
+        self.data_processor.process_unprocessed_contests()
         logger.info("Contest finder process completed")
 
     def start(self):
