@@ -29,6 +29,7 @@ class ContestFilter:
                                 for sport, sport_contests in cls.filter_by_entrants(contests, max_entrants).items()}
         
         filtered_contests = {}
+        excluded_times = ['1:00PM', '4:05PM', '4:15PM', '4:25PM']
         for sport in contests.keys():
             filtered_ids = filtered_by_entrants.get(sport, set())
             filtered_contests[sport] = [
@@ -39,7 +40,9 @@ class ContestFilter:
                 and "satellite" not in contest.get('n', '').lower()
                 and "madden" not in contest.get('n', '').lower()
                 and float(contest.get('a', 0)) <= max_entry_fee
-                and contest.get('gameType') in ['Classic', 'Showdown Captain Mode']
+                and (contest.get('gameType') == 'Classic' or 
+                     (contest.get('gameType') == 'Showdown Captain Mode' and 
+                      not any(time in contest.get('sdstring', '') for time in excluded_times)))
             ]
         
         return filtered_contests
