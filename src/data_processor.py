@@ -102,7 +102,7 @@ class DataProcessor:
                 analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
                 contest.update(analysis_result)
 
-                contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] < 0.3 else 'processed'
+                contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.8 else 'processed'
 
                 self.db_manager.insert_contest(contest)
 
@@ -117,6 +117,6 @@ class DataProcessor:
             analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
             contest.update(analysis_result)
 
-            contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] < 0.3 else 'processed'
+            contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.8 else 'processed'
 
             self.db_manager.update_contest_status(contest['id'], contest['status'])
