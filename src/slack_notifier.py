@@ -14,6 +14,21 @@ class SlackNotifier:
     def __init__(self, token=None, client=None):
         self.token = token or os.getenv("SLACK_BOT_TOKEN") or "test_token"
         self.client = client or WebClient(token=self.token)
+
+    def notify_contest(self, contest: Dict[str, Any]) -> None:
+        message = self._format_contest_message(contest)
+        self.send_notification(message)
+
+    def _format_contest_message(self, contest: Dict[str, Any]) -> str:
+        return (
+            f"🚨 New contest ready to enter! 🚨\n"
+            f"Title: {contest['title']}\n"
+            f"Entry Fee: ${contest['entry_fee']:.2f}\n"
+            f"Total Prizes: ${contest['total_prizes']:.2f}\n"
+            f"Entries: {contest['current_entries']}/{contest['maximum_entries']}\n"
+            f"Highest Experience Ratio: {contest['highest_experience_ratio']:.2%}\n"
+            f"Contest Link: https://www.draftkings.com/contest/draftteam/{contest['id']}"
+        )
         self.channel = "__dk_contests"
 
     def send_notification(self, message, max_retries=3):

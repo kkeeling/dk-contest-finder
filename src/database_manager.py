@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 from typing import List, Dict, Any
 from .utils import with_spinner
+from .slack_notifier import SlackNotifier
 
 load_dotenv('.env.local')
 
@@ -15,6 +16,7 @@ class DatabaseManager:
     def __init__(self):
         self.supabase = None
         self.initialize_supabase()
+        self.slack_notifier = SlackNotifier()
 
     def initialize_supabase(self):
         url: str = os.getenv("SUPABASE_URL")
@@ -60,6 +62,11 @@ class DatabaseManager:
         try:
             self.supabase.table('contests').update({'status': status}).eq('id', contest_id).execute()
             logger.info(f"Updated status of contest {contest_id} to {status}")
+            
+            # If status is changed to 'ready_to_enter', send notification
+            if status == 'ready_to_enter':
+                contest = self.supabase.table('contests').select('*').eq('id', contest_id).execute().data[0]
+                self.slack_notifier.notify_contest(contest)
         except Exception as e:
             logger.error(f"Error updating status of contest {contest_id}: {str(e)}")
             raise
@@ -88,16 +95,24 @@ class DatabaseManager:
             }
             
             # Check if the contest already exists
-            existing_contest = self.supabase.table('contests').select('id').eq('id', contest['id']).execute()
+            existing_contest = self.supabase.table('contests').select('id', 'status').eq('id', contest['id']).execute()
             
             if existing_contest.data:
                 # Update existing contest
                 self.supabase.table('contests').update(processed_contest).eq('id', contest['id']).execute()
                 logger.info(f"Successfully updated contest {contest['id']}")
+                
+                # Check if status changed to 'ready_to_enter'
+                if existing_contest.data[0]['status'] != 'ready_to_enter' and processed_contest['status'] == 'ready_to_enter':
+                    self.slack_notifier.notify_contest(processed_contest)
             else:
                 # Insert new contest
                 self.supabase.table('contests').insert(processed_contest).execute()
                 logger.info(f"Successfully inserted contest {contest['id']}")
+                
+                # If new contest is 'ready_to_enter', send notification
+                if processed_contest['status'] == 'ready_to_enter':
+                    self.slack_notifier.notify_contest(processed_contest)
         except Exception as e:
             logger.error(f"Error inserting or updating contest {contest['id']}: {str(e)}")
             raise
