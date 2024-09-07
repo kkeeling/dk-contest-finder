@@ -36,6 +36,7 @@ class ContestFilter:
                 if contest['id'] in filtered_ids 
                 and "casual" not in contest.get('n', '').lower() 
                 and "beginner" not in contest.get('n', '').lower()
+                and "satellite" not in contest.get('n', '').lower()
                 and float(contest.get('a', 0)) <= max_entry_fee
                 and contest.get('gameType') in ['Classic', 'Showdown Captain Mode']
             ]
