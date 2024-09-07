@@ -22,10 +22,6 @@ class ContestFilter:
     def apply_filters(cls, contests: Dict[str, List[Dict[str, Any]]], max_entrants: int = 5, title_keyword: str = "Double Up", max_entry_fee: float = 50.0) -> Dict[str, List[Dict[str, Any]]]:
         filtered_by_entrants = {sport: set(contest['id'] for contest in sport_contests)
                                 for sport, sport_contests in cls.filter_by_entrants(contests, max_entrants).items()}
-        filtered_by_title = {} #{sport: set(contest['id'] for contest in sport_contests)
-                             #for sport, sport_contests in cls.filter_by_title(contests, title_keyword).items()}
-        filtered_by_entry_fee = {} #{sport: set(contest['id'] for contest in sport_contests)
-                                 #for sport, sport_contests in cls.filter_by_entry_fee(contests, max_entry_fee).items()}
         
         filtered_contests = {}
         for sport in contests.keys():
