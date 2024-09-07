@@ -39,7 +39,7 @@ class DataFetcher:
         
         self.last_request_time = time.time()
 
-    @with_spinner("Fetching contests", spinner_type="dots")
+    @with_spinner("Fetching contests for sport", spinner_type="dots")
     def fetch_contests(self, sport: str) -> List[Dict[str, Any]]:
         if sport not in self.SUPPORTED_SPORTS:
             return []
@@ -56,12 +56,18 @@ class DataFetcher:
         except requests.RequestException as e:
             logger.error(f"Error fetching contests: {e}")
             return []
+        except Exception as e:
+            logger.error(f"Unexpected error in fetch_contests: {e}", exc_info=True)
+            return []
 
     @with_spinner("Fetching all contests", spinner_type="dots")
     def fetch_all_contests(self) -> Dict[str, List[Dict[str, Any]]]:
         all_contests = {}
         for sport in self.SUPPORTED_SPORTS:
-            all_contests[sport] = self.fetch_contests(sport)
+            try:
+                all_contests[sport] = self.fetch_contests(sport)
+            except Exception as e:
+                logger.error(f"Error fetching contests for sport {sport}: {e}", exc_info=True)
         return all_contests
 
     @with_spinner("Fetching contest details", spinner_type="dots")

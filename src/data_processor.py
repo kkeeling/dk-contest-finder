@@ -5,7 +5,7 @@ from .utils import with_spinner
 class ContestFilter:
     @staticmethod
     def filter_by_entrants(contests: Dict[str, List[Dict[str, Any]]], max_entrants: int) -> Dict[str, List[Dict[str, Any]]]:
-        return {sport: [contest for contest in sport_contests if contest.get('m', 0) < max_entrants]
+        return {sport: [contest for contest in sport_contests if contest.get('m', 0) <= max_entrants]
                 for sport, sport_contests in contests.items()}
 
     @staticmethod
@@ -19,17 +19,17 @@ class ContestFilter:
                 for sport, sport_contests in contests.items()}
 
     @classmethod
-    def apply_filters(cls, contests: Dict[str, List[Dict[str, Any]]], max_entrants: int = 5, title_keyword: str = "Double Up", max_entry_fee: float = 100.0) -> Dict[str, List[Dict[str, Any]]]:
+    def apply_filters(cls, contests: Dict[str, List[Dict[str, Any]]], max_entrants: int = 5, title_keyword: str = "Double Up", max_entry_fee: float = 50.0) -> Dict[str, List[Dict[str, Any]]]:
         filtered_by_entrants = {sport: set(contest['id'] for contest in sport_contests)
                                 for sport, sport_contests in cls.filter_by_entrants(contests, max_entrants).items()}
-        filtered_by_title = {sport: set(contest['id'] for contest in sport_contests)
-                             for sport, sport_contests in cls.filter_by_title(contests, title_keyword).items()}
-        filtered_by_entry_fee = {sport: set(contest['id'] for contest in sport_contests)
-                                 for sport, sport_contests in cls.filter_by_entry_fee(contests, max_entry_fee).items()}
+        filtered_by_title = {} #{sport: set(contest['id'] for contest in sport_contests)
+                             #for sport, sport_contests in cls.filter_by_title(contests, title_keyword).items()}
+        filtered_by_entry_fee = {} #{sport: set(contest['id'] for contest in sport_contests)
+                                 #for sport, sport_contests in cls.filter_by_entry_fee(contests, max_entry_fee).items()}
         
         filtered_contests = {}
         for sport in contests.keys():
-            filtered_ids = filtered_by_entrants.get(sport, set()).union(filtered_by_title.get(sport, set())).intersection(filtered_by_entry_fee.get(sport, set()))
+            filtered_ids = filtered_by_entrants.get(sport, set()) #.union(filtered_by_title.get(sport, set())).intersection(filtered_by_entry_fee.get(sport, set()))
             filtered_contests[sport] = [contest for contest in contests[sport] if contest['id'] in filtered_ids]
         
         return filtered_contests
@@ -78,7 +78,9 @@ class DataProcessor:
     @with_spinner("Processing contests", spinner_type="dots")
     def process_contests(self, contests: Dict[str, List[Dict[str, Any]]]) -> None:
         filtered_contests = ContestFilter.apply_filters(contests)
-        
+
+        total_contests = sum(len(sport_contests) for sport_contests in filtered_contests.values())
+        print(f', Found {total_contests} contests')
         for sport, sport_contests in filtered_contests.items():
             for contest in sport_contests:
                 contest_details = self.data_fetcher.fetch_contest_details(contest['id'])
