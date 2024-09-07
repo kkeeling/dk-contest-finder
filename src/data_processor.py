@@ -31,6 +31,7 @@ class ContestFilter:
                 if contest['id'] in filtered_ids 
                 and "casual" not in contest.get('n', '').lower() 
                 and "beginner" not in contest.get('n', '').lower()
+                and float(contest.get('a', 0)) <= max_entry_fee
             ]
         
         return filtered_contests
