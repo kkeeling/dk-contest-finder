@@ -73,7 +73,7 @@ class DatabaseManager:
             logger.error(f"Error retrieving entrants for contest {contest_id}: {str(e)}")
             raise
 
-    @with_spinner("Inserting or updating contest", spinner_type="dots")
+    @with_spinner("\nInserting or updating contest", spinner_type="dots")
     def insert_contest(self, contest: Dict[str, Any]) -> None:
         try:
             processed_contest = {
@@ -102,7 +102,7 @@ class DatabaseManager:
             logger.error(f"Error inserting or updating contest {contest['id']}: {str(e)}")
             raise
 
-    @with_spinner("Inserting contests", spinner_type="dots")
+    @with_spinner("\nInserting contests", spinner_type="dots")
     def batch_insert_contests(self, contests: List[Dict[str, Any]], batch_size: int = 100) -> None:
         try:
             for contest in contests:
@@ -112,7 +112,7 @@ class DatabaseManager:
             logger.error(f"Error inserting contests: {str(e)}")
             raise
 
-    @with_spinner("Inserting entrants", spinner_type="dots")
+    @with_spinner("\nInserting entrants", spinner_type="dots")
     def batch_insert_entrants(self, contest_id: str, entrants: List[Dict[str, Any]], batch_size: int = 100) -> None:
         try:
             inserted_count = 0
@@ -129,7 +129,7 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error inserting entrants for contest {contest_id}: {str(e)}")
 
-    @with_spinner("Querying contests", spinner_type="dots")
+    @with_spinner("\nQuerying contests", spinner_type="dots")
     def query_contests(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
         try:
             query = self.supabase.table('contests').select('*')
