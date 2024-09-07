@@ -83,7 +83,7 @@ class DataProcessor:
     def __init__(self, data_fetcher):
         self.db_manager = DatabaseManager()
         self.data_fetcher = data_fetcher
-        self.blacklisted_usernames = set(["user1", "user2", "user3"])  # Add your blacklisted usernames here
+        self.blacklisted_usernames = set(["lakergreat2", "theleafnode", "glamrock"])  # Add your blacklisted usernames here
 
     def has_blacklisted_user(self, entrants: List[Dict[str, Any]]) -> bool:
         return any(entrant['username'] in self.blacklisted_usernames for entrant in entrants)
@@ -106,7 +106,7 @@ class DataProcessor:
                 # Check for blacklisted usernames
                 if self.has_blacklisted_user(entrants):
                     contest['highest_experience_ratio'] = 1.0
-                    contest['status'] = 'processed'
+                    contest['status'] = 'scooped'
                 else:
                     analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
                     contest.update(analysis_result)
