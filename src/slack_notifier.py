@@ -52,13 +52,13 @@ class SlackNotifier:
                     raise e
         raise Exception("Max retries exceeded")
 
-    def notify_contest(self, contest):
-        message = self._format_contest_message(contest)
-        return self.send_notification(message)
+    def notify_contest(self, contest: Dict[str, Any], entrants: List[Dict[str, Any]]) -> None:
+        message = self._format_contest_message(contest, entrants)
+        self.send_notification(message)
 
-    def _format_contest_message(self, contest):
-        return f"""
-New eligible contest found!
+    def _format_contest_message(self, contest: Dict[str, Any], entrants: List[Dict[str, Any]]) -> str:
+        message = f"""
+🚨 New eligible contest found! 🚨
 Title: {contest.get('title', 'N/A')}
 Entry Fee: ${contest.get('entry_fee', 'N/A')}
 Total Prizes: ${contest.get('total_prizes', 'N/A')}
@@ -66,7 +66,21 @@ Current Entries: {contest.get('current_entries', 'N/A')}
 Maximum Entries: {contest.get('maximum_entries', 'N/A')}
 Highest Experience Ratio: {contest.get('highest_experience_ratio', 'N/A'):.2%}
 Link: https://www.draftkings.com/draft/contest/{contest.get('id', '')}
-        """
+
+Entrants:
+"""
+        for entrant in entrants[:5]:  # Show only the first 5 entrants
+            experience_level = self._get_experience_level_text(entrant['experience_level'])
+            message += f"- {entrant['username']} ({experience_level})\n"
+        
+        if len(entrants) > 5:
+            message += f"... and {len(entrants) - 5} more"
+        
+        return message
+
+    def _get_experience_level_text(self, level: int) -> str:
+        levels = {0: "Beginner", 1: "Low", 2: "Medium", 3: "Highest"}
+        return levels.get(level, "Unknown")
 
     def test_connection(self):
         try:
