@@ -18,10 +18,6 @@ class SlackNotifier:
         self.channel = channel or os.getenv("SLACK_CHANNEL") or "test_channel"
         self.channel = channel or os.getenv("SLACK_CHANNEL") or "__dk_contests"
 
-    def notify_contest(self, contest: Dict[str, Any]) -> None:
-        message = self._format_contest_message(contest)
-        self.send_notification(message)
-
     def _format_contest_message(self, contest: Dict[str, Any]) -> str:
         return (
             f"🚨 New contest ready to enter! 🚨\n"
@@ -53,12 +49,13 @@ class SlackNotifier:
         raise Exception("Max retries exceeded")
 
     def notify_contest(self, contest: Dict[str, Any], entrants: list[Dict[str, Any]]) -> None:
+        print(entrants)
         message = self._format_contest_message(contest, entrants)
         self.send_notification(message)
 
     def _format_contest_message(self, contest: Dict[str, Any], entrants: list[Dict[str, Any]]) -> str:
         message = f"""
-🚨 New eligible contest found! 🚨
+New eligible contest found!
 Title: {contest.get('title', 'N/A')}
 Entry Fee: ${contest.get('entry_fee', 'N/A')}
 Total Prizes: ${contest.get('total_prizes', 'N/A')}
