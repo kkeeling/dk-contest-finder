@@ -104,7 +104,8 @@ class DatabaseManager:
                 
                 # Check if status changed to 'ready_to_enter'
                 if existing_contest.data[0]['status'] != 'ready_to_enter' and processed_contest['status'] == 'ready_to_enter':
-                    self.slack_notifier.notify_contest(processed_contest)
+                    entrants = self.get_contest_entrants(contest['id'])
+                    self.slack_notifier.notify_contest(processed_contest, entrants)
             else:
                 # Insert new contest
                 self.supabase.table('contests').insert(processed_contest).execute()
@@ -112,7 +113,8 @@ class DatabaseManager:
                 
                 # If new contest is 'ready_to_enter', send notification
                 if processed_contest['status'] == 'ready_to_enter':
-                    self.slack_notifier.notify_contest(processed_contest)
+                    entrants = self.get_contest_entrants(contest['id'])
+                    self.slack_notifier.notify_contest(processed_contest, entrants)
         except Exception as e:
             logger.error(f"Error inserting or updating contest {contest['id']}: {str(e)}")
             raise

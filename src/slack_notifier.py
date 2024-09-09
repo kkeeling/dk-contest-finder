@@ -15,6 +15,7 @@ class SlackNotifier:
     def __init__(self, token=None, client=None, channel=None):
         self.token = token or os.getenv("SLACK_BOT_TOKEN") or "test_token"
         self.client = client or WebClient(token=self.token)
+        self.channel = channel or os.getenv("SLACK_CHANNEL") or "test_channel"
         self.channel = channel or os.getenv("SLACK_CHANNEL") or "__dk_contests"
 
     def notify_contest(self, contest: Dict[str, Any]) -> None:
