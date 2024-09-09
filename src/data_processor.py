@@ -128,7 +128,7 @@ class DataProcessor:
                     if max_entrants == 3:
                         contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.7 else 'processed'
                     elif max_entrants == 4:
-                        contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.8 else 'processed'
+                        contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.51 else 'processed'
                     elif max_entrants == 5:
                         contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.61 else 'processed'
                     else:
