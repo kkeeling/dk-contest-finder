@@ -73,11 +73,15 @@ class EntrantAnalyzer:
             level = EntrantAnalyzer.categorize_experience_level(entrant.get('experience_level', 0))
             experience_counts[level] += 1
 
+        # Assume all empty slots will be filled with highest experienced entrants
+        empty_slots = max_entrants - total_entrants
+        experience_counts[3] += empty_slots
+
         # Calculate highest_experience_ratio by dividing the number of highly experienced entrants by max_entrants
         highest_experience_ratio = experience_counts[3] / max_entrants
 
         experience_distribution = {
-            level: count / total_entrants
+            level: count / max_entrants  # Use max_entrants instead of total_entrants
             for level, count in experience_counts.items()
         }
 
