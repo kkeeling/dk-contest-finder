@@ -122,7 +122,17 @@ class DataProcessor:
                     max_entrants = contest['entries']['maximum']
                     analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants, max_entrants)
                     contest.update(analysis_result)
-                    contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.3 else 'processed'
+                    max_entrants = contest['maximum_entries']
+                    highest_experience_ratio = analysis_result['highest_experience_ratio']
+                
+                    if max_entrants == 3:
+                        contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.7 else 'processed'
+                    elif max_entrants == 4:
+                        contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.8 else 'processed'
+                    elif max_entrants == 5:
+                        contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.61 else 'processed'
+                    else:
+                        contest['status'] = 'ready_to_enter' if highest_experience_ratio <= 0.3 else 'processed'
 
                 self.db_manager.insert_contest(contest)
 
@@ -142,6 +152,16 @@ class DataProcessor:
                 max_entrants = contest['maximum_entries']  # Assuming this field exists in the database
                 analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants, max_entrants)
                 contest.update(analysis_result)
-                contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.3 else 'processed'
+                max_entrants = contest['entries']['maximum']
+                highest_experience_ratio = analysis_result['highest_experience_ratio']
+                
+                if max_entrants == 3:
+                    contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.7 else 'processed'
+                elif max_entrants == 4:
+                    contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.8 else 'processed'
+                elif max_entrants == 5:
+                    contest['status'] = 'ready_to_enter' if highest_experience_ratio < 0.61 else 'processed'
+                else:
+                    contest['status'] = 'ready_to_enter' if highest_experience_ratio <= 0.3 else 'processed'
 
             self.db_manager.update_contest_status(contest['id'], contest['status'])
