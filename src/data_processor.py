@@ -134,10 +134,7 @@ class DataProcessor:
                     else:
                         contest['status'] = 'ready_to_enter' if highest_experience_ratio <= 0.3 else 'processed'
 
-                self.db_manager.insert_contest(contest)
-
-                if entrants:
-                    self.db_manager.batch_insert_entrants(contest['id'], entrants)
+                self.db_manager.insert_or_update_contest_and_entrants(contest, entrants)
 
     @with_spinner("\nProcessing unprocessed contests", spinner_type="dots")
     def process_unprocessed_contests(self) -> None:

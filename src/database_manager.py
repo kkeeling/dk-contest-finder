@@ -81,8 +81,8 @@ class DatabaseManager:
             logger.error(f"Error retrieving entrants for contest {contest_id}: {str(e)}")
             raise
 
-    @with_spinner("\nInserting or updating contest", spinner_type="dots")
-    def insert_contest(self, contest: Dict[str, Any]) -> None:
+    @with_spinner("\nInserting or updating contest and entrants", spinner_type="dots")
+    def insert_or_update_contest_and_entrants(self, contest: Dict[str, Any], entrants: List[Dict[str, Any]]) -> None:
         try:
             processed_contest = {
                 'id': contest.get('id'),
@@ -102,50 +102,42 @@ class DatabaseManager:
                 # Update existing contest
                 self.supabase.table('contests').update(processed_contest).eq('id', contest['id']).execute()
                 logger.info(f"Successfully updated contest {contest['id']}")
-                
-                # Check if status changed to 'ready_to_enter'
-                if existing_contest.data[0]['status'] != 'ready_to_enter' and processed_contest['status'] == 'ready_to_enter':
-                    entrants = self.get_contest_entrants(contest['id'])
-                    self.slack_notifier.notify_contest(processed_contest, entrants)
             else:
                 # Insert new contest
                 self.supabase.table('contests').insert(processed_contest).execute()
                 logger.info(f"Successfully inserted contest {contest['id']}")
-                
-                # If new contest is 'ready_to_enter', send notification
-                if processed_contest['status'] == 'ready_to_enter':
-                    entrants = self.get_contest_entrants(contest['id'])
-                    self.slack_notifier.notify_contest(processed_contest, entrants)
+            
+            # Insert or update entrants
+            inserted_count = 0
+            for entrant in entrants:
+                # Check if entrant already exists
+                existing_entrant = self.supabase.table("entrants").select("id").eq("contest_id", contest['id']).eq("username", entrant["username"]).execute()
+                if not existing_entrant.data:
+                    # Insert only if entrant doesn't exist
+                    self.supabase.table("entrants").insert({"contest_id": contest['id'], **entrant}).execute()
+                    inserted_count += 1
+                else:
+                    # Update existing entrant
+                    self.supabase.table("entrants").update(entrant).eq("id", existing_entrant.data[0]['id']).execute()
+            logger.info(f"Successfully inserted {inserted_count} new entrants and updated existing entrants for contest {contest['id']}")
+            
+            # Send notification if contest is ready to enter
+            if processed_contest['status'] == 'ready_to_enter':
+                self.slack_notifier.notify_contest(processed_contest, entrants)
         except Exception as e:
-            logger.error(f"Error inserting or updating contest {contest['id']}: {str(e)}")
+            logger.error(f"Error inserting or updating contest {contest['id']} and its entrants: {str(e)}")
             raise
 
-    @with_spinner("\nInserting contests", spinner_type="dots")
-    def batch_insert_contests(self, contests: List[Dict[str, Any]], batch_size: int = 100) -> None:
+    @with_spinner("\nProcessing contests", spinner_type="dots")
+    def process_contests(self, contests: List[Dict[str, Any]]) -> None:
         try:
             for contest in contests:
-                self.insert_contest(contest)
-            logger.info(f"Successfully inserted {len(contests)} contests")
+                entrants = contest.pop('participants', [])
+                self.insert_or_update_contest_and_entrants(contest, entrants)
+            logger.info(f"Successfully processed {len(contests)} contests")
         except Exception as e:
-            logger.error(f"Error inserting contests: {str(e)}")
+            logger.error(f"Error processing contests: {str(e)}")
             raise
-
-    @with_spinner("\nInserting entrants", spinner_type="dots")
-    def batch_insert_entrants(self, contest_id: str, entrants: List[Dict[str, Any]], batch_size: int = 100) -> None:
-        try:
-            inserted_count = 0
-            for i in range(0, len(entrants), batch_size):
-                batch = entrants[i:i+batch_size]
-                for entrant in batch:
-                    # Check if entrant already exists
-                    existing_entrant = self.supabase.table("entrants").select("id").eq("contest_id", contest_id).eq("username", entrant["username"]).execute()
-                    if not existing_entrant.data:
-                        # Insert only if entrant doesn't exist
-                        self.supabase.table("entrants").insert({"contest_id": contest_id, **entrant}).execute()
-                        inserted_count += 1
-            logger.info(f"Successfully inserted {inserted_count} new entrants for contest {contest_id}")
-        except Exception as e:
-            logger.error(f"Error inserting entrants for contest {contest_id}: {str(e)}")
 
     @with_spinner("\nQuerying contests", spinner_type="dots")
     def query_contests(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
