@@ -52,11 +52,11 @@ class SlackNotifier:
                     raise e
         raise Exception("Max retries exceeded")
 
-    def notify_contest(self, contest: Dict[str, Any], entrants: List[Dict[str, Any]]) -> None:
+    def notify_contest(self, contest: Dict[str, Any], entrants: list[Dict[str, Any]]) -> None:
         message = self._format_contest_message(contest, entrants)
         self.send_notification(message)
 
-    def _format_contest_message(self, contest: Dict[str, Any], entrants: List[Dict[str, Any]]) -> str:
+    def _format_contest_message(self, contest: Dict[str, Any], entrants: list[Dict[str, Any]]) -> str:
         message = f"""
 🚨 New eligible contest found! 🚨
 Title: {contest.get('title', 'N/A')}
