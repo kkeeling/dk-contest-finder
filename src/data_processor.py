@@ -122,7 +122,6 @@ class DataProcessor:
                     max_entrants = contest['entries']['maximum']
                     analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants, max_entrants)
                     contest.update(analysis_result)
-                    max_entrants = contest['maximum_entries']
                     highest_experience_ratio = analysis_result['highest_experience_ratio']
                 
                     if max_entrants == 3:
