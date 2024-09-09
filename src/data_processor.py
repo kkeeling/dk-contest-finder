@@ -62,8 +62,8 @@ class EntrantAnalyzer:
             return 3  # highest
 
     @staticmethod
-    def analyze_experience_levels(entrants: List[Dict[str, Any]]) -> Dict[str, Any]:
-        if not entrants:
+    def analyze_experience_levels(entrants: List[Dict[str, Any]], max_entrants: int) -> Dict[str, Any]:
+        if not entrants or max_entrants <= 0:
             return {"highest_experience_ratio": 0.0, "experience_distribution": {}}
 
         experience_counts = {0: 0, 1: 0, 2: 0, 3: 0}
@@ -73,7 +73,8 @@ class EntrantAnalyzer:
             level = EntrantAnalyzer.categorize_experience_level(entrant.get('experience_level', 0))
             experience_counts[level] += 1
 
-        highest_experience_ratio = experience_counts[3] / total_entrants
+        # Calculate highest_experience_ratio by dividing the number of highly experienced entrants by max_entrants
+        highest_experience_ratio = experience_counts[3] / max_entrants
 
         experience_distribution = {
             level: count / total_entrants
@@ -114,9 +115,10 @@ class DataProcessor:
                     contest['highest_experience_ratio'] = 1.0
                     contest['status'] = 'scooped'
                 else:
-                    analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
+                    max_entrants = contest['entries']['maximum']
+                    analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants, max_entrants)
                     contest.update(analysis_result)
-                    contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.8 else 'processed'
+                    contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.3 else 'processed'
 
                 self.db_manager.insert_contest(contest)
 
@@ -133,8 +135,9 @@ class DataProcessor:
                 contest['highest_experience_ratio'] = 1.0
                 contest['status'] = 'processed'
             else:
-                analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants)
+                max_entrants = contest['maximum_entries']  # Assuming this field exists in the database
+                analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants, max_entrants)
                 contest.update(analysis_result)
-                contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.8 else 'processed'
+                contest['status'] = 'ready_to_enter' if analysis_result['highest_experience_ratio'] <= 0.3 else 'processed'
 
             self.db_manager.update_contest_status(contest['id'], contest['status'])
