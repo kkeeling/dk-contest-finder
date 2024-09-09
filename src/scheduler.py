@@ -29,8 +29,8 @@ class Scheduler:
 
     def start(self):
         self.is_running = True
-        schedule.every(30).minutes.do(self.run_contest_finder)
-        logger.info("Scheduler started. Running contest finder every 30 minutes.")
+        schedule.every(5).minutes.do(self.run_contest_finder)
+        logger.info("Scheduler started. Running contest finder every 5 minutes.")
         
         # Run the contest finder immediately on start
         self.run_contest_finder()
