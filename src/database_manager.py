@@ -66,7 +66,8 @@ class DatabaseManager:
             # If status is changed to 'ready_to_enter', send notification
             if status == 'ready_to_enter':
                 contest = self.supabase.table('contests').select('*').eq('id', contest_id).execute().data[0]
-                self.slack_notifier.notify_contest(contest)
+                entrants = self.get_contest_entrants(contest_id)
+                self.slack_notifier.notify_contest(contest, entrants)
         except Exception as e:
             logger.error(f"Error updating status of contest {contest_id}: {str(e)}")
             raise
