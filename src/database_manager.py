@@ -98,7 +98,9 @@ class DatabaseManager:
             # Check if the contest already exists
             existing_contest = self.supabase.table('contests').select('id', 'status').eq('id', contest['id']).execute()
             
+            previous_status = None
             if existing_contest.data:
+                previous_status = existing_contest.data[0]['status']
                 # Update existing contest
                 self.supabase.table('contests').update(processed_contest).eq('id', contest['id']).execute()
                 logger.info(f"Successfully updated contest {contest['id']}")
@@ -121,8 +123,8 @@ class DatabaseManager:
                     self.supabase.table("entrants").update(entrant).eq("id", existing_entrant.data[0]['id']).execute()
             logger.info(f"Successfully inserted {inserted_count} new entrants and updated existing entrants for contest {contest['id']}")
             
-            # Send notification if contest is ready to enter
-            if processed_contest['status'] == 'ready_to_enter':
+            # Send notification if contest is ready to enter and wasn't previously ready to enter
+            if processed_contest['status'] == 'ready_to_enter' and previous_status != 'ready_to_enter':
                 self.slack_notifier.notify_contest(processed_contest, entrants)
         except Exception as e:
             logger.error(f"Error inserting or updating contest {contest['id']} and its entrants: {str(e)}")
