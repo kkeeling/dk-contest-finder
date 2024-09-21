@@ -115,6 +115,10 @@ class DataProcessor:
                 contest.update(contest_details)
                 entrants = contest.pop('participants', [])
 
+                # Check if the contest is already full
+                if len(entrants) >= contest['entries']['maximum']:
+                    continue  # Skip this contest as it's already full
+
                 # Check for blacklisted usernames
                 if self.has_blacklisted_user(entrants):
                     contest['highest_experience_ratio'] = 1.0
@@ -142,6 +146,11 @@ class DataProcessor:
         for contest in unprocessed_contests:
             entrants = self.db_manager.get_contest_entrants(contest['id'])
             
+            # Check if the contest is already full
+            if len(entrants) >= contest['maximum_entries']:
+                self.db_manager.update_contest_status(contest['id'], 'processed')
+                continue  # Skip this contest as it's already full
+
             if self.has_blacklisted_user(entrants):
                 contest['highest_experience_ratio'] = 1.0
                 contest['status'] = 'processed'
@@ -149,7 +158,6 @@ class DataProcessor:
                 max_entrants = contest['maximum_entries']  # Assuming this field exists in the database
                 analysis_result = EntrantAnalyzer.analyze_experience_levels(entrants, max_entrants)
                 contest.update(analysis_result)
-                max_entrants = contest['entries']['maximum']
                 highest_experience_ratio = analysis_result['highest_experience_ratio']
                 
                 if max_entrants == 3:
